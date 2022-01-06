@@ -1,5 +1,4 @@
 const http = require('http');
-const fs = require('fs')
 
 var link = {
     "amphi-l":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/KYNvDgYv.shu",
@@ -70,14 +69,6 @@ function parse(data) {
             push[nkey] = nvalue;
         }
     }
-    
-    //fs.writeFile('test.txt', JSON.stringify(obj), err => {
-    //    if (err) {
-    //      console.error(err)
-    //      return
-    //    }
-    //    //file written successfully
-    //})
     return obj;
 }
 
