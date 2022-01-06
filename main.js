@@ -78,7 +78,7 @@ function parse(data) {
     //    }
     //    //file written successfully
     //})
-    //return obj;
+    return obj;
 }
 
 function main(salle){
