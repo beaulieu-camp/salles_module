@@ -42,17 +42,18 @@ function dichotomie(liste,datetime,a,b){
 }
 
 function parse(data) {
-    var data = data.replace(" \r\n "," ");
-    data = data.replace("\r\n "," ");
-    data = data.replace(" \r\n"," ");
+    var data = data.replaceAll(" \r\n ","");
+    data = data.replaceAll("\r\n ","");
+    data = data.replaceAll(" \r\n","");
     data = data.split("\r\n");
+
     var obj =  [];
     var push =  {};
     for (var cle in data) {
         var valeur = data[cle]
-        var split = valeur.split(':',2);
+        var split = valeur.split(':');
         var nkey = split[0];
-        var nvalue = split[1];
+        var nvalue = split.slice(1).join(" ");
         if (nkey == "BEGIN" && nvalue != "VCALENDAR"){
             push =  {};
         }
@@ -69,7 +70,15 @@ function parse(data) {
             push[nkey] = nvalue;
         }
     }
-    return obj;
+    
+    //fs.writeFile('test.txt', JSON.stringify(obj), err => {
+    //    if (err) {
+    //      console.error(err)
+    //      return
+    //    }
+    //    //file written successfully
+    //})
+    //return obj;
 }
 
 function main(salle){
@@ -80,7 +89,7 @@ function main(salle){
         resp.on('data', (chunk) => {
             data += chunk;
         });
-        resp.on('end', () => {
+        resp.on('end', () => {            
             var cal = parse(data)
             cal.sort((a, b) => (a.DTEND > b.DTSTART) ? 1 : -1)
             var date = Date.now()
@@ -91,7 +100,7 @@ function main(salle){
             else{
                 console.log(salle,"Libre")
             }
-
+              
         });
     }).on("error", (err) => {
       console.log("Error",err.message);
