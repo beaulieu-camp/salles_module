@@ -1,4 +1,4 @@
-const http = require('http');
+const axios = require('axios');
 
 var link = {
     "amphi-l":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/KYNvDgYv.shu",
@@ -75,27 +75,18 @@ function parse(data) {
 function main(salle){
     const https = require('https');
     var url = link[salle]
-    https.get(url, (resp) => {
-        let data = '';
-        resp.on('data', (chunk) => {
-            data += chunk;
-        });
-        resp.on('end', () => {            
-            var cal = parse(data)
-            cal.sort((a, b) => (a.DTEND > b.DTSTART) ? 1 : -1)
-            var date = Date.now()
-            var state = dichotomie(cal,date,0,cal.length)
-            if (state){
-                console.log(salle,"Occupée")
-            }
-            else{
-                console.log(salle,"Libre")
-            }
-              
-        });
-    }).on("error", (err) => {
-      console.log("Error",err.message);
-    });
+    axios.get(url).then( function(response) {
+        var cal = parse(response.data)
+        cal.sort((a, b) => (a.DTEND > b.DTSTART) ? 1 : -1)
+        var date = Date.now()
+        var state = dichotomie(cal,date,0,cal.length)
+        if (state){
+            console.log(salle, "Occupé");
+        }
+        else{
+            console.log(salle, "Libre");
+        }
+    })
 }
 
 for (var salle of salles){
