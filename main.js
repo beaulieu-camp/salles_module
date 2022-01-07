@@ -123,8 +123,7 @@ async function salleEvents(salle,date){
     */
     var url = link[salle]
     var cal = await get_cal(url);   
-    var req = dichotomie(cal,date,0,cal.length)
-    var state = req[0]    
+    var req = dichotomie(cal,date,0,cal.length)  
     var i = req[1]
 
     var liste = []
