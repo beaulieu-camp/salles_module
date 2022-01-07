@@ -33,10 +33,10 @@ function dichotomie(liste,datetime,a,b){
         var test2 = datetime < to_date(liste[b]["DTSTART"])
 
         if (test1 && test2){
-            return [true,liste[b]["DTSTART"]]
+            return [true,b]
         }
         else{
-            return [false,liste[a]["DTEND"]]
+            return [false,a]
         }
          
     }
@@ -82,24 +82,36 @@ function parse(data) {
     return obj;
 }
 
-function main(salle){
+async function request(url){
+    const resp = await axios.get(url);
+    return resp.data;
+};
+
+async function get_cal(url){
+    var resp = await request(url);
+    var cal = parse(resp)
+    cal.sort((a, b) => (a.DTEND > b.DTSTART) ? 1 : -1)
+    return cal
+}
+
+async function main(salle){
     var url = link[salle]
-    axios.get(url).then( function(response) {
-        var cal = parse(response.data)
-        cal.sort((a, b) => (a.DTEND > b.DTSTART) ? 1 : -1)
-        var date = Date.now()
-        var req = dichotomie(cal,date,0,cal.length)
-        var state = req[0]
-        var jusque = req[1]
-        var offset = new Date().getTimezoneOffset();
-        offset = offset*60*1000
-        if (state){
-            console.log(salle, "Libre jusque", new Date(to_date(jusque)-offset));
-        }
-        else{
-            console.log(salle, "Occupé jusque", new Date(to_date(jusque)-offset) , "minimum");
-        }
-    })
+    var date = Date.now()
+    var cal = await get_cal(url);   
+    var req = dichotomie(cal,date,0,cal.length)
+    var state = req[0]    
+    var i = req[1]
+    
+    var offset = new Date().getTimezoneOffset();
+    offset = offset*60*1000
+    if (state){
+        var jusque = cal[i]["DTSTART"]
+        console.log(salle, "Libre jusque", new Date(to_date(jusque)-offset));
+    }
+    else{
+        var jusque = cal[i]["DTEND"]
+        console.log(salle, "Occupé jusque", new Date(to_date(jusque)-offset) , "minimum");
+    }
 }
 
 function salleLibres(){
