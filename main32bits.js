@@ -24,13 +24,22 @@ function to_date(char){
     var hour = char.slice(9,11)
     var minute = char.slice(11,13)
     var sec = char.slice(13,15)
-    var date = new Date(year,parseInt(month)-1,day,parseInt(hour)+2,minute,sec)
+    var date = new Date(Date.UTC(year,parseInt(month)-1,day,parseInt(hour),minute,sec))
     return date.getTime()
 }
 
 function dichotomie(liste,datetime,a,b){
-    if (b-a <= 1){
-        return !(to_date(liste[a]["DTEND"]) < datetime && datetime < to_date(liste[b]["DTSTART"]))
+    if (b-a == 1){
+        var test1 = to_date(liste[a]["DTEND"]) < datetime
+        var test2 = datetime < to_date(liste[b]["DTSTART"])
+
+        if (test1 && test2){
+            return [true,liste[b]["DTSTART"]]
+        }
+        else{
+            return [false,liste[a]["DTEND"]]
+        }
+         
     }
     var m = Math.floor((b+a)/2)
     if (datetime < to_date(liste[m]["DTSTART"])) {
@@ -53,6 +62,7 @@ function parse(data) {
         var valeur = data[cle]
         var split = valeur.split(':');
         var nkey = split[0];
+        
         var nvalue = split.slice(1).join(" ");
         if (nkey == "BEGIN" && nvalue != "VCALENDAR"){
             push =  {};
@@ -79,12 +89,16 @@ function main(salle){
         var cal = parse(response.data)
         cal.sort((a, b) => (a.DTEND > b.DTSTART) ? 1 : -1)
         var date = Date.now()
-        var state = dichotomie(cal,date,0,cal.length)
+        var req = dichotomie(cal,date,0,cal.length)
+        var state = req[0]
+        var jusque = req[1]
+        var offset = new Date().getTimezoneOffset();
+        offset = offset*60*1000
         if (state){
-            console.log(salle, "Occupé");
+            console.log(salle, "Libre jusque", new Date(to_date(jusque)-offset));
         }
         else{
-            console.log(salle, "Libre");
+            console.log(salle, "Occupé jusque", new Date(to_date(jusque)-offset) , "minimum");
         }
     })
 }
