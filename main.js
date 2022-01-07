@@ -115,11 +115,9 @@ async function salleLibres(salle,date=Date.now()){
     
     if (state){
         var jusque = cal[i]["DTSTART"]
-        //console.log(salle, "Libre jusque", new Date(to_date(jusque)-offset));
     }
     else{
         var jusque = cal[i]["DTEND"]
-        //console.log(salle, "Occupé jusque", new Date(to_date(jusque)-offset) , "minimum");
     }
     return [state,to_date(jusque)]
 }
