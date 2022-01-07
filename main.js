@@ -114,10 +114,36 @@ async function main(salle){
     }
 }
 
+async function salle_horaire_libre(salle,date){
+    /*
+        Retourne les horaires des cours/events d'une journée donnée dans une salle donnée
+        salle : string
+        date : int (UNIX time)
+        return : liste des events d'une journée
+    */
+    var url = link[salle]
+    var cal = await get_cal(url);   
+    var req = dichotomie(cal,date,0,cal.length)
+    var state = req[0]    
+    var i = req[1]
+
+    var liste = []
+    while (to_date(cal[i]["DTEND"]) < date + 24*60*60*1000){
+        liste.push(cal[i])
+        i+=1
+    }
+    return liste
+}
+
 function salleLibres(){
     for (var salle of salles){
         main(salle)
     }
 }
+
+//salleLibres()
+//var date = new Date(Date.UTC(2022,0,10))
+//date = date.getTime()
+//salle_horaire_libre(salles[0],date)
 
 exports.salleLibres = salleLibres;
