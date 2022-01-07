@@ -1,4 +1,3 @@
-//pour les vieilles version de node
 const axios = require('axios');
 
 var link = {
