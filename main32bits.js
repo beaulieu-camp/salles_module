@@ -74,7 +74,6 @@ function parse(data) {
 }
 
 function main(salle){
-    const https = require('https');
     var url = link[salle]
     axios.get(url).then( function(response) {
         var cal = parse(response.data)
