@@ -94,35 +94,48 @@ async function get_cal(url){
     return cal
 }
 
-async function main(salle){
+async function salleLibres(salle,date=Date.now()){
+    /*
+        Retourne si la salle est libre (true) ou non (false) sur 
+
+        date est par défaut Date.now()
+
+        Args : 
+            - salle : string
+            - date : int (UNIX time)
+        Return :
+            - Libre [0] : booléen
+            - Jusqu'à quand [1] : int (UNIX time)
+    */
     var url = link[salle]
-    var date = Date.now()
-    var cal = await get_cal(url);   
+    var cal = await get_cal(url);
     var req = dichotomie(cal,date,0,cal.length)
     var state = req[0]    
     var i = req[1]
     
-    var offset = new Date().getTimezoneOffset();
-    offset = offset*60*1000
     if (state){
         var jusque = cal[i]["DTSTART"]
-        console.log(salle, "Libre jusque", new Date(to_date(jusque)-offset));
+        //console.log(salle, "Libre jusque", new Date(to_date(jusque)-offset));
     }
     else{
         var jusque = cal[i]["DTEND"]
-        console.log(salle, "Occupé jusque", new Date(to_date(jusque)-offset) , "minimum");
+        //console.log(salle, "Occupé jusque", new Date(to_date(jusque)-offset) , "minimum");
     }
+    return [state,to_date(jusque)]
 }
 
 async function salleEvents(salle,date){
     /*
         Retourne les horaires des cours/events d'une journée donnée dans une salle donnée
-        salle : string
-        date : int (UNIX time)
-        return : liste des events d'une journée
+        
+        Args:
+            - salle : string
+            - date : int (UNIX time)
+        return : 
+            - liste des events d'une journée
     */
     var url = link[salle]
-    var cal = await get_cal(url);   
+    var cal = await get_cal(url);
     var req = dichotomie(cal,date,0,cal.length)  
     var i = req[1]
 
@@ -134,16 +147,28 @@ async function salleEvents(salle,date){
     return liste
 }
 
-function salleLibres(){
+function convert_unix_to_local(unix){
+    var offset = new Date().getTimezoneOffset();
+    offset = offset*60*1000
+    return new Date(unix-offset)
+}
+
+async function main(){
+    console.log("Salles Libres")
     for (var salle of salles){
-        main(salle)
+        var resp = await salleLibres(salle)
+        console.log(salle, "Libre ?",resp[0], convert_unix_to_local(resp[1]));
+    }
+    console.log("Salles Events")
+    for (var salle of salles){
+        var date = new Date(Date.UTC(2022,0,10))
+        date = date.getTime()
+        var resp = await salleEvents(salle,date)
+        console.log(salle, resp);
     }
 }
 
-//salleLibres()
-//var date = new Date(Date.UTC(2022,0,10))
-//date = date.getTime()
-//salleEvents(salles[0],date)
+//main()
 
 exports.salleLibres = salleLibres;
 exports.salleEvents = salleEvents;
