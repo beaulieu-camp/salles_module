@@ -1,3 +1,4 @@
+//pour les vieilles version de node
 const axios = require('axios');
 
 var link = {
@@ -23,13 +24,13 @@ function to_date(char){
     var hour = char.slice(9,11)
     var minute = char.slice(11,13)
     var sec = char.slice(13,15)
-    var date = new Date(year,month,day,parseInt(hour)+2,minute,sec)
+    var date = new Date(year,parseInt(month)-1,day,parseInt(hour)+2,minute,sec)
     return date.getTime()
 }
 
 function dichotomie(liste,datetime,a,b){
-    if (b-a == 1){
-        return !(to_date(liste[a]["DTSTART"]) < datetime < to_date(liste[a]["DTEND"]))
+    if (b-a <= 1){
+        return !(to_date(liste[a]["DTEND"]) < datetime && datetime < to_date(liste[b]["DTSTART"]))
     }
     var m = Math.floor((b+a)/2)
     if (datetime < to_date(liste[m]["DTSTART"])) {
