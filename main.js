@@ -102,6 +102,10 @@ function main(salle){
     })
 }
 
-for (var salle of salles){
-    main(salle)
+function salleLibres(){
+    for (var salle of salles){
+        main(salle)
+    }
 }
+
+exports.salleLibres = salleLibres;
