@@ -114,7 +114,7 @@ async function main(salle){
     }
 }
 
-async function salle_horaire_libre(salle,date){
+async function salleEvents(salle,date){
     /*
         Retourne les horaires des cours/events d'une journée donnée dans une salle donnée
         salle : string
@@ -144,6 +144,7 @@ function salleLibres(){
 //salleLibres()
 //var date = new Date(Date.UTC(2022,0,10))
 //date = date.getTime()
-//salle_horaire_libre(salles[0],date)
+//salleEvents(salles[0],date)
 
 exports.salleLibres = salleLibres;
+exports.salleEvents = salleEvents;
