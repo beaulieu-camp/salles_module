@@ -104,8 +104,8 @@ async function salleLibres(salle,date=Date.now()){
             - salle : string
             - date : int (UNIX time)
         Return :
-            - Libre [0] : booléen
-            - Jusqu'à quand [1] : int (UNIX time)
+            - return.state : booléen : état de la salle ( libre : true , occupé : false )
+            - return.until : int : date de fin de l'état (UNIX time)
     */
     var url = link[salle]
     var cal = await get_cal(url);
@@ -119,7 +119,7 @@ async function salleLibres(salle,date=Date.now()){
     else{
         var jusque = cal[i]["DTEND"]
     }
-    return [state,to_date(jusque)]
+    return {"state":state,"until":to_date(jusque)}
 }
 
 async function salleEvents(salle,date){
@@ -155,7 +155,7 @@ async function main(){
     console.log("Salles Libres")
     for (var salle of salles){
         var resp = await salleLibres(salle)
-        console.log(salle, "Libre ?",resp[0], convert_unix_to_local(resp[1]));
+        console.log(salle, "Libre ?",resp.state, convert_unix_to_local(resp.until));
     }
     console.log("Salles Events")
     for (var salle of salles){
@@ -170,3 +170,6 @@ async function main(){
 
 exports.salleLibres = salleLibres;
 exports.salleEvents = salleEvents;
+exports.convert_unix_to_local = convert_unix_to_local;
+exports.salles = salles
+exports.salles_links = link
