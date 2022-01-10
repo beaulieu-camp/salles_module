@@ -12,24 +12,53 @@ client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
 
 
-    if (interaction.commandName === 'find') {
-        interaction.deferReply();
+    if (interaction.commandName === 'test') {
+
+	var fields = [{
+		"name" : "Aucune salle ne semble disponible actuellement",
+		"value": "Si tu pense qu'il s'agit d'une erreur, contacte un modérateur"
+	}]
+	var embed = {
+      		"color": null,
+      		"fields": fields,
+      		"author": {
+        		"name": "Salles Ouvertes",
+        		"icon_url": "https://cdn.discordapp.com/icons/619496069184618498/505d82722799b797c65b6a55ca5d3cf8.webp?size=96"
+      		},
+      		"footer": {
+        		"text": "SEB - https://github.com/AquaBx/salles_esir"
+      		}
+    	}
+
+        interaction.reply({"embeds" : [embed]});
 
         const salles = sl.salles;
         const channel = interaction.channel;
+	fields = [];
 
         for (var i=0; i < salles.length; i++){
 
             const salle = salles[i]
             await sl.salleLibres(salle)
             .then(state => {
-                if (state["state"]) sendState(channel, salle, state)
+                if (state["state"]) fields.push(messageState(salle, state));
             })
             .catch(console.error)
-
         }
 
-        interaction.reply("Commande terminée, " + salles.length + " ont été analysés")
+	embed = {
+     		"color": null,
+      		"fields": fields,
+      		"author": {
+        		"name": "Salles Ouvertes",
+        		"icon_url": "https://cdn.discordapp.com/icons/619496069184618498/505d82722799b797c65b6a55ca5d3cf8.webp?size=96"
+      		},
+      		"footer": {
+        		"text": "SEB - https://github.com/AquaBx/salles_esir"
+      		}
+    	}
+
+	if (fields.length != 0) interaction.editReply({"embeds" : [embed]})
 
     }
 
@@ -47,6 +76,16 @@ function sendState(channel, salle, state){
 
     message += sl.convert_unix_to_local(state["until"]).toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
     channel.send(message + "\n");
+
+}
+
+function messageState(salle, state){
+
+	var res = {
+		"name" : salle,
+		"value" : "Ouvert jusqu'à " + sl.convert_unix_to_local(state["until"]).toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
+	}
+	return res
 
 }
 
