@@ -14,27 +14,18 @@ client.on('interactionCreate', async interaction => {
 
     if (interaction.commandName === 'salle') {
 
-	var fields = [{
-		"name" : "Aucune salle ne semble disponible actuellement",
-		"value": "Si tu pense qu'il s'agit d'une erreur, contacte un modérateur"
-	}]
-	var embed = {
-      		"color": null,
-      		"fields": fields,
-      		"author": {
-        		"name": "Salles Ouvertes",
-        		"icon_url": "https://cdn.discordapp.com/icons/619496069184618498/505d82722799b797c65b6a55ca5d3cf8.webp?size=96"
-      		},
-      		"footer": {
-        		"text": "SEB - https://github.com/AquaBx/salles_esir"
-      		}
-    	}
+		var fields = [{
+			"name" : "Aucune salle ne semble disponible actuellement",
+			"value": "Si tu pense qu'il s'agit d'une erreur, contacte un modérateur"
+		}]
+
+		var embed = createEmbed(fields)
 
         interaction.reply({"embeds" : [embed]});
 
         const salles = sl.salles;
         const channel = interaction.channel;
-	fields = [];
+		fields = [];
 
         for (var i=0; i < salles.length; i++){
 
@@ -46,19 +37,9 @@ client.on('interactionCreate', async interaction => {
             .catch(console.error)
         }
 
-	embed = {
-     		"color": null,
-      		"fields": fields,
-      		"author": {
-        		"name": "Salles Ouvertes",
-        		"icon_url": "https://cdn.discordapp.com/icons/619496069184618498/505d82722799b797c65b6a55ca5d3cf8.webp?size=96"
-      		},
-      		"footer": {
-        		"text": "SEB - https://github.com/AquaBx/salles_esir"
-      		}
-    	}
+		embed = createEmbed(fields)
 
-	if (fields.length != 0) interaction.editReply({"embeds" : [embed]})
+		if (fields.length != 0) interaction.editReply({"embeds" : [embed]})
 
     }
 
@@ -69,7 +50,7 @@ function sendState(channel, salle, state){
     var message = ""
     //Si la salle est un amphi
     if (salle.includes("amphi") ) message += "L'" + salle + " ";
-    else message += "La " + salle + " ";
+    else message += "La " + sl.salles_names[salle] + " ";
 
     if (state["state"]) message += "est disponible jusqu'a "
     else message += "est indisponible jusqu'a "
@@ -83,11 +64,25 @@ function messageState(salle, state){
 
 	const date = new Date((state["until"]))
 	var res = {
-		"name" : salle,
+		"name" : sl.salles_names[salle],
 		"value" : "Ouvert jusqu'à " + date.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
 	}
 	return res
 
+}
+
+function createEmbed(fields){
+	return {
+		"color": null,
+		 "fields": fields,
+		 "author": {
+		   "name": "Salles Ouvertes",
+		   "icon_url": "https://cdn.discordapp.com/icons/619496069184618498/505d82722799b797c65b6a55ca5d3cf8.webp?size=96"
+		 },
+		 "footer": {
+		   "text": "SEB - https://github.com/AquaBx/salles_esir"
+		 }
+   }
 }
 
 client.login(token);
