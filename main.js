@@ -16,6 +16,20 @@ var link = {
 
 var salles = ["amphi-l","amphi-m","amphi-n","salle-001","salle-002","salle-003","salle-004","salle-101","salle-102","salle-103","salle-104"]
 
+var name = {
+    "amphi-l":"Amphi L",
+    "amphi-m":"Amphi M",
+    "amphi-n":"Amphi N",
+    "salle-001":"Salle 001",
+    "salle-002":"Salle 002",
+    "salle-003":"Salle 003",
+    "salle-004":"Salle 004",
+    "salle-101":"Salle 101",
+    "salle-102":"Salle 102",
+    "salle-103":"Salle 103",
+    "salle-104":"Salle 104"
+}
+
 function to_date(char){
     var year = char.slice(0,4)
     var month = char.slice(4,6)
@@ -172,3 +186,4 @@ exports.salleEvents = salleEvents;
 exports.convert_unix_to_local = convert_unix_to_local;
 exports.salles = salles
 exports.salles_links = link
+exports.salles_names = name
