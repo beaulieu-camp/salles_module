@@ -22,7 +22,9 @@ client.on('interactionCreate', async interaction => {
 
             const salle = salles[i]
             sl.salleLibres(salle)
-            .then(state => sendState(channel, salle, state))
+            .then(state => {
+                if (state["state"]) sendState(channel, salle, state)
+            })
             .catch(console.error)
 
         }
@@ -44,7 +46,7 @@ function sendState(channel, salle, state){
     else message += "est indisponible jusqu'a "
 
     message += sl.convert_unix_to_local(state["until"])
-    channel.send("message");
+    channel.send(message + "\n");
 
 }
 
