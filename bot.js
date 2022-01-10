@@ -73,8 +73,8 @@ function sendState(channel, salle, state){
 
     if (state["state"]) message += "est disponible jusqu'a "
     else message += "est indisponible jusqu'a "
-
-    message += sl.convert_unix_to_local(state["until"]).toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
+    var date = new Date((state["until"]))
+    message += date.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
     channel.send(message + "\n");
 
 }
