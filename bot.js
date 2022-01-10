@@ -21,7 +21,7 @@ client.on('interactionCreate', async interaction => {
         for (var i=0; i < salles.length; i++){
 
             const salle = salles[i]
-            sl.salleLibres(salle)
+            await sl.salleLibres(salle)
             .then(state => {
                 if (state["state"]) sendState(channel, salle, state)
             })
@@ -29,7 +29,7 @@ client.on('interactionCreate', async interaction => {
 
         }
 
-        interaction.reply("Commande terminée")
+        interaction.reply("Commande terminée, " + salles.length + " ont été analysés")
 
     }
 
