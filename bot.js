@@ -36,7 +36,7 @@ function sendState(channel, salle, state){
 
     var message = ""
     //Si la salle est un amphi
-    if (salle.startWith("amphi") ) message += "L'" + salle + " ";
+    if (salle.includes("amphi") ) message += "L'" + salle + " ";
     else message += "La " + salle + " ";
 
     if (state["state"]) message += "est disponible jusqu'a "
