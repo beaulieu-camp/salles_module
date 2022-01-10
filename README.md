@@ -1,8 +1,10 @@
-# salles_esir
-
-Module qui permet de renvoyer des informations pratiques sur les emplois du temps des salles de l'ESIR
+# Salles ESIR
 
 ---
+
+## Module
+
+Le module "main.js" permet de renvoyer des informations pratiques sur les emplois du temps des salles de l'ESIR
 
 | Nom de l'export | Description |
 | --- | --- |
@@ -11,5 +13,11 @@ Module qui permet de renvoyer des informations pratiques sur les emplois du temp
 | exports.convert_unix_to_local | renvoie la date dans le fuseau horaire locale d'un temps UNIX |
 | exports.salles | renvoie une liste des salles possibles |
 | exports.salles_links | renvoie un dictionnaire des liens des emplois du temps des salles |
+
+---
+
+## Bot
+
+Le bot "bot.js" est un bot discord basé sur discordjs et qui utilise les fonctionnalités du module "main.js"
 
 ---
