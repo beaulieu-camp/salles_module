@@ -13,6 +13,7 @@ Le module "main.js" permet de renvoyer des informations pratiques sur les emploi
 | exports.convert_unix_to_local | renvoie la date dans le fuseau horaire locale d'un temps UNIX |
 | exports.salles | renvoie une liste des salles possibles |
 | exports.salles_links | renvoie un dictionnaire des liens des emplois du temps des salles |
+| exports.salles_names | renvoie un dictionnaire des noms des salles |
 
 ---
 
