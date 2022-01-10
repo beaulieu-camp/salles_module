@@ -14,6 +14,16 @@ client.on('interactionCreate', async interaction => {
 
     if (interaction.commandName === 'salle') {
 
+		const horaire = interaction.options.getInteger("horaire");
+		const jour = interaction.options.getInteger("jour");
+		const definedSalle = interaction.options.getString("salle");
+
+		var date = new Date();
+		if (horaire != undefined) date.setHours(horaire)
+		if (jour != undefined) date.setDate(date.getDate() + jour)
+
+		console.log(jour)
+
 		var fields = [{
 			"name" : "Aucune salle ne semble disponible actuellement",
 			"value": "Si tu pense qu'il s'agit d'une erreur, contacte un modérateur"
@@ -23,18 +33,19 @@ client.on('interactionCreate', async interaction => {
 
         interaction.reply({"embeds" : [embed]});
 
-        const salles = sl.salles;
-        const channel = interaction.channel;
+        var salles = sl.salles;
+		if (definedSalle != undefined) salles = [definedSalle];
 		fields = [];
 
         for (var i=0; i < salles.length; i++){
 
             const salle = salles[i]
-            await sl.salleLibres(salle)
+            await sl.salleLibres(salle, date)
             .then(state => {
                 if (state["state"]) fields.push(messageState(salle, state));
             })
             .catch(console.error)
+
         }
 
 		embed = createEmbed(fields)
