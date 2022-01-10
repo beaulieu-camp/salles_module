@@ -74,6 +74,7 @@ function sendState(channel, salle, state){
 function messageState(salle, state){
 
 	const date = new Date((state["until"]))
+	date.setHours(date.getHours() + 1)
 	var res = {
 		"name" : sl.salles_names[salle],
 		"value" : "Ouvert jusqu'à " + date.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
