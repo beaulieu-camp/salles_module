@@ -21,4 +21,26 @@ Le module "main.js" permet de renvoyer des informations pratiques sur les emploi
 
 Le bot "bot.js" est un bot discord basé sur discordjs et qui utilise les fonctionnalités du module "main.js"
 
+### Dependencies
+
+`$ npm install discord.js`
+`$ npm install axios`
+
+### How to use
+
+#### Step 1
+
+`$ nano token.json` and parse :
+```
+{
+    "token" : "your bot's token"
+}
+```
+
+#### Step 2
+
+`$ node bot.js`
+or
+`$ pm2 start index.js`
+
 ---
