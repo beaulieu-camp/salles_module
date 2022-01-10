@@ -10,11 +10,11 @@ client.on('ready', () => {
 
 client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
-    
-    
+
+
     if (interaction.commandName === 'find') {
         interaction.deferReply();
-    
+
         const salles = sl.salles;
         const channel = interaction.channel;
 
@@ -45,28 +45,9 @@ function sendState(channel, salle, state){
     if (state["state"]) message += "est disponible jusqu'a "
     else message += "est indisponible jusqu'a "
 
-    message += dateToString(sl.convert_unix_to_local(state["until"]))
+    message += sl.convert_unix_to_local(state["until"]).toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
     channel.send(message + "\n");
 
-}
-
-function dateToString(date){
-    var res = ""
-
-    const Day = date.getDay();
-    if (Day == 0) res += "Lundi "
-    else if (Day == 1) res += "Mardi "
-    else if (Day == 2) res += "Mercredi "
-    else if (Day == 3) res += "Jeudi "
-    else if (Day == 4) res += "Vendredi "
-    else if (Day == 5) res += "Samedi "
-    else if (Day == 6) res += "Dimanche "
-
-    res += date.getDate() + " à ";
-    res += date.getHours() + "h";
-    if (date.getMinutes() != 0) res += date.getMinutes()
-    
-    return res;
 }
 
 client.login(token);
