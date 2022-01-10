@@ -145,10 +145,9 @@ async function salleEvents(salle,date){
     return liste
 }
 
-function convert_unix_to_local(unix){
-    var offset = new Date().getTimezoneOffset();
-    offset = offset*60*1000
-    return new Date(unix-offset)
+function convert_unix_to_local(unix,local="fr-FR"){
+    var date = new Date(unix)
+    return date.toLocaleDateString(local, {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
 }
 
 async function main(){
