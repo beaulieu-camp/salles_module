@@ -12,7 +12,7 @@ client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
 
 
-    if (interaction.commandName === 'test') {
+    if (interaction.commandName === 'salle') {
 
 	var fields = [{
 		"name" : "Aucune salle ne semble disponible actuellement",
@@ -73,7 +73,7 @@ function sendState(channel, salle, state){
 
     if (state["state"]) message += "est disponible jusqu'a "
     else message += "est indisponible jusqu'a "
-    var date = new Date((state["until"]))
+    const date = new Date((state["until"]))
     message += date.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
     channel.send(message + "\n");
 
@@ -81,9 +81,10 @@ function sendState(channel, salle, state){
 
 function messageState(salle, state){
 
+	const date = new Date((state["until"]))
 	var res = {
 		"name" : salle,
-		"value" : "Ouvert jusqu'à " + sl.convert_unix_to_local(state["until"]).toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
+		"value" : "Ouvert jusqu'à " + date.toLocaleDateString("fr-FR", {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
 	}
 	return res
 
