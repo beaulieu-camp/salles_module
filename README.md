@@ -41,6 +41,6 @@ Le bot "bot.js" est un bot discord basé sur discordjs et qui utilise les foncti
 
 `$ node bot.js`
 or
-`$ pm2 start index.js`
+`$ pm2 start bot.js`
 
 ---
