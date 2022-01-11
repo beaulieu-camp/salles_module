@@ -18,18 +18,24 @@ client.on('interactionCreate', async interaction => {
 		const jour = interaction.options.getInteger("jour");
 		const definedSalle = interaction.options.getString("salle");
 
-		var date = new Date();
-		if (horaire != undefined) date.setHours(horaire)
-		if (jour != undefined) date.setDate(date.getDate() + jour)
+		var title = "Salles Ouvertes"
 
-		console.log(jour)
+		var date = new Date();
+		if (jour != undefined){
+			date.setDate(date.getDate() + jour)
+			title += " le " + date.getDate()
+		}
+		if (horaire != undefined) {
+			date.setHours(horaire)
+			title += " à " + horaire + "h"
+		}
 
 		var fields = [{
 			"name" : "Aucune salle ne semble disponible actuellement",
 			"value": "Si tu pense qu'il s'agit d'une erreur, contacte un modérateur"
 		}]
 
-		var embed = createEmbed(fields)
+		var embed = createEmbed(title, fields)
 
         interaction.reply({"embeds" : [embed]});
 
@@ -48,7 +54,7 @@ client.on('interactionCreate', async interaction => {
 
         }
 
-		embed = createEmbed(fields)
+		embed = createEmbed(title, fields)
 
 		if (fields.length != 0) interaction.editReply({"embeds" : [embed]})
 
@@ -83,12 +89,12 @@ function messageState(salle, state){
 
 }
 
-function createEmbed(fields){
+function createEmbed(title, fields){
 	return {
 		"color": null,
 		 "fields": fields,
 		 "author": {
-		   "name": "Salles Ouvertes",
+		   "name": title,
 		   "icon_url": "https://cdn.discordapp.com/icons/619496069184618498/505d82722799b797c65b6a55ca5d3cf8.webp?size=96"
 		 },
 		 "footer": {
