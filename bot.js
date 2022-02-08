@@ -65,7 +65,7 @@ client.on('interactionCreate', async interaction => {
 
 		embed = createEmbed(title, fields)
 
-		if (/*fields.length != 0 */ false) interaction.editReply({"embeds" : [embed]})
+		if (fields.length != 0) interaction.editReply({"embeds" : [embed]})
 		else interaction.editReply({"embeds" : [createEmbed(title, fieldsVide)]})
 
     }
