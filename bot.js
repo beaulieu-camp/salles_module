@@ -4,6 +4,10 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 
 const { token } = require('./token.json');
 
+const liveGuildId = "619496069184618498"
+const liveChannelId = "940691747770605628"
+var liveMessage;
+
 client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`);
 });
@@ -31,6 +35,11 @@ client.on('interactionCreate', async interaction => {
 		}
 
 		var fields = [{
+			"name" : "En cours d'actualisation ...",
+			"value": "Si tu pense qu'il s'agit d'une erreur, contacte un modérateur"
+		}]
+
+		const fieldsVide = [{
 			"name" : "Aucune salle ne semble disponible actuellement",
 			"value": "Si tu pense qu'il s'agit d'une erreur, contacte un modérateur"
 		}]
@@ -56,7 +65,8 @@ client.on('interactionCreate', async interaction => {
 
 		embed = createEmbed(title, fields)
 
-		if (fields.length != 0) interaction.editReply({"embeds" : [embed]})
+		if (/*fields.length != 0 */ false) interaction.editReply({"embeds" : [embed]})
+		else interaction.editReply({"embeds" : [createEmbed(title, fieldsVide)]})
 
     }
 
