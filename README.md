@@ -2,9 +2,9 @@
 
 ---
 
-## Module
+## Modules
 
-Le module "main.js" permet de renvoyer des informations pratiques sur les emplois du temps des salles de l'ESIR
+Le module "module_salles.js" permet de renvoyer des informations pratiques sur les emplois du temps des salles de l'ESIR
 
 | Nom de l'export | Description |
 | --- | --- |
@@ -14,6 +14,9 @@ Le module "main.js" permet de renvoyer des informations pratiques sur les emploi
 | exports.salles | renvoie une liste des salles possibles |
 | exports.salles_links | renvoie un dictionnaire des liens des emplois du temps des salles |
 | exports.salles_names | renvoie un dictionnaire des noms des salles |
+
+
+Le module "module_bu.js" permet de renvoyer des informations sur les horaires d'ouvertures des Bibliothèques unniversitaires
 
 ---
 
