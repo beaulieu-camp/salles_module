@@ -1,5 +1,5 @@
 const { Client, Intents} = require('discord.js');
-const sl = require('./main');
+const sl = require('./module_salles');
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]});
 
 const { token } = require('./token.json');
