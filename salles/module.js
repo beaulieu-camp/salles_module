@@ -141,11 +141,11 @@ function convert_unix_to_local(unix,local="fr-FR"){
     return date.toLocaleDateString(local, {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
 }
 
-async function main(){
+async function exemple(salles){
     console.log("Salles Libres")
 
-    for (var salle in this.salles){
-        var resp = await salleLibres(this.salles[salle])
+    for (var salle in salles){
+        var resp = await salleLibres(salles[salle])
         if (resp.erreur){
             console.log(resp.erreur)
         }
@@ -154,31 +154,26 @@ async function main(){
         }
     }
     console.log("Salles Events")
-    for (var salle in this.salles){
+    for (var salle in salles){
         if (resp.erreur){
             console.log(resp.erreur)
         }
         else{
             var date = new Date(Date.UTC(2022,0,10))
             date = date.getTime()
-            var resp = await salleEvents(this.salles[salle],date)
+            var resp = await salleEvents(salles[salle],date)
             console.log(salle, resp);
         }
     }
 }
 
-module.exports = (async function() {
-    let resp = await fetch("https://cdn.jsdelivr.net/gh/AquaBx/salles_esir/data_salles.json")
-    let salles = await resp.json()
+let module_salles = class {
+    static salleLibres = salleLibres
+    static salleEvents = salleEvents
+    static convert_unix_to_local = convert_unix_to_local
+    static exemple = exemple
+}
 
-    let module_salles = class {
-        static salleLibres = salleLibres
-        static salleEvents = salleEvents
-        static convert_unix_to_local = convert_unix_to_local
-        static salles = salles
-        
-        static exemple = main
-    }
-
-    return module_salles;
-})();
+if (typeof exports === 'object' && typeof module !== 'undefined') { 
+    module.exports = module_salles; 
+}
