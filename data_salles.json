@@ -1,46 +1,46 @@
 {
   "amphi-l": {
-    "name": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/KYNvDgYv.shu",
-    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/KYNvDgYv.shu"
+    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/KYNvDgYv.shu",
+    "name": "amphi-l"
   },
   "amphi-m": {
-    "name": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/V3LwD2WA.shu",
-    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/V3LwD2WA.shu"
+    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/V3LwD2WA.shu",
+    "name": "amphi-m"
   },
   "amphi-n": {
-    "name": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/XnmgOl3r.shu",
-    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/XnmgOl3r.shu"
+    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/XnmgOl3r.shu",
+    "name": "amphi-n"
   },
   "salle-001": {
-    "name": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/pn82LL38.shu",
-    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/pn82LL38.shu"
+    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/pn82LL38.shu",
+    "name": "salle-001"
   },
   "salle-002": {
-    "name": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/qnqPZBYJ.shu",
-    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/qnqPZBYJ.shu"
+    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/qnqPZBYJ.shu",
+    "name": "salle-002"
   },
   "salle-003": {
-    "name": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/o356qeYR.shu",
-    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/o356qeYR.shu"
+    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/o356qeYR.shu",
+    "name": "salle-003"
   },
   "salle-004": {
-    "name": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/KW74qA3M.shu",
-    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/KW74qA3M.shu"
+    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/KW74qA3M.shu",
+    "name": "salle-004"
   },
   "salle-101": {
-    "name": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/134B51nk.shu",
-    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/134B51nk.shu"
+    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/134B51nk.shu",
+    "name": "salle-101"
   },
   "salle-102": {
-    "name": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/ynAw4b3w.shu",
-    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/ynAw4b3w.shu"
+    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/ynAw4b3w.shu",
+    "name": "salle-102"
   },
   "salle-103": {
-    "name": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/E3ejzdY5.shu",
-    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/E3ejzdY5.shu"
+    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/E3ejzdY5.shu",
+    "name": "salle-103"
   },
   "salle-104": {
-    "name": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/OnE5qdnr.shu",
-    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/OnE5qdnr.shu"
+    "link": "https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/OnE5qdnr.shu",
+    "name": "salle-104"
   }
 }
