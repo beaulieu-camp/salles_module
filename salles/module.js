@@ -126,7 +126,12 @@ async function salleEvents(salle,date){
     var url = salle["link"]
     var cal = await get_cal(url);
     var req = dichotomie(cal,date,0,cal.length)  
+    var state = req[0]
     var i = req[1]
+
+    if ( state === undefined ) {
+        return {"erreur":i}
+    }
 
     var liste = []
     while (to_date(cal[i]["DTEND"]) < date + 24*60*60*1000){
