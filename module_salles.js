@@ -198,7 +198,7 @@ async function main(){
 
 //main()
 
-export default class {
+export default class module_salles {
     static salleLibres = salleLibres
     static salleEvents = salleEvents
     static convert_unix_to_local = convert_unix_to_local
