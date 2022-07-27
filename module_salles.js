@@ -198,13 +198,15 @@ async function main(){
 
 //main()
 
-export default class module_salles {
+let module_salles = class {
     static salleLibres = salleLibres
     static salleEvents = salleEvents
     static convert_unix_to_local = convert_unix_to_local
     static salles = salles
-    static link = link
-    static name = name
+    static salles_link = link
+    static salles_names = name
 
     static exemple = main
 }
+
+module.exports = module_salles;
