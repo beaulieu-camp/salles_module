@@ -1,5 +1,3 @@
-const axios = require('axios');
-
 var link = {
     "amphi-l":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/KYNvDgYv.shu",
     "amphi-m":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/V3LwD2WA.shu",
@@ -43,6 +41,10 @@ function to_date(char){
 
 function dichotomie(liste,datetime,a,b){
     if (b-a == 1){
+        
+        if ( liste[b] === undefined ) return [undefined,"Les plannings ne sont pas à jour"]
+        if ( liste[a] === undefined ) return [undefined,"Les plannings sont en avance :)"]
+
         var test1 = to_date(liste[a]["DTEND"]) < datetime
         var test2 = datetime < to_date(liste[b]["DTSTART"])
 
@@ -97,8 +99,8 @@ function parse(data) {
 }
 
 async function request(url){
-    const resp = await axios.get(url);
-    return resp.data;
+    const resp = await fetch(url);
+    return await resp.text();
 };
 
 async function get_cal(url){
@@ -127,6 +129,10 @@ async function salleLibres(salle,date=Date.now()){
     var state = req[0]    
     var i = req[1]
     
+    if ( state === undefined ) {
+        return {"erreur":i}
+    }
+
     if (state){
         var jusque = cal[i]["DTSTART"]
     }
@@ -168,22 +174,37 @@ async function main(){
     console.log("Salles Libres")
     for (var salle of salles){
         var resp = await salleLibres(salle)
-        console.log(salle, "Libre ?",resp.state, convert_unix_to_local(resp.until));
+
+        if (resp.erreur){
+            console.log(resp.erreur)
+        }
+        else{
+            console.log(salle, "Libre ?",resp.state, convert_unix_to_local(resp.until));
+        }
     }
     console.log("Salles Events")
     for (var salle of salles){
-        var date = new Date(Date.UTC(2022,0,10))
-        date = date.getTime()
-        var resp = await salleEvents(salle,date)
-        console.log(salle, resp);
+        if (resp.erreur){
+            console.log(resp.erreur)
+        }
+        else{
+            var date = new Date(Date.UTC(2022,0,10))
+            date = date.getTime()
+            var resp = await salleEvents(salle,date)
+            console.log(salle, resp);
+        }
     }
 }
 
 //main()
 
-exports.salleLibres = salleLibres;
-exports.salleEvents = salleEvents;
-exports.convert_unix_to_local = convert_unix_to_local;
-exports.salles = salles
-exports.salles_links = link
-exports.salles_names = name
+export default class {
+    static salleLibres = salleLibres
+    static salleEvents = salleEvents
+    static convert_unix_to_local = convert_unix_to_local
+    static salles = salles
+    static link = link
+    static name = name
+
+    static exemple = main
+}
