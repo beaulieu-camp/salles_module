@@ -1,5 +1,3 @@
-let salles
-
 function to_date(char){
     var year = char.slice(0,4)
     var month = char.slice(4,6)
@@ -83,6 +81,7 @@ async function get_cal(url){
 }
 
 async function salleLibres(salle,date=Date.now()){
+
     /*
         Retourne si la salle est libre (true) ou non (false) sur 
 
@@ -95,7 +94,7 @@ async function salleLibres(salle,date=Date.now()){
             - return.state : booléen : état de la salle ( libre : true , occupé : false )
             - return.until : int : date de fin de l'état (UNIX time)
     */
-    var url = salles[salle]["link"]
+    var url = salle["link"]
     var cal = await get_cal(url);
     var req = dichotomie(cal,date,0,cal.length)
     var state = req[0]    
@@ -124,7 +123,7 @@ async function salleEvents(salle,date){
         return : 
             - liste des events d'une journée
     */
-    var url = salles[salle][link]
+    var url = salle[link]
     var cal = await get_cal(url);
     var req = dichotomie(cal,date,0,cal.length)  
     var i = req[1]
@@ -144,9 +143,9 @@ function convert_unix_to_local(unix,local="fr-FR"){
 
 async function main(){
     console.log("Salles Libres")
-    for (var salle of salles){
-        var resp = await salleLibres(salle)
 
+    for (var salle in this.salles){
+        var resp = await salleLibres(this.salles[salle])
         if (resp.erreur){
             console.log(resp.erreur)
         }
@@ -155,21 +154,21 @@ async function main(){
         }
     }
     console.log("Salles Events")
-    for (var salle of salles){
+    for (var salle in this.salles){
         if (resp.erreur){
             console.log(resp.erreur)
         }
         else{
             var date = new Date(Date.UTC(2022,0,10))
             date = date.getTime()
-            var resp = await salleEvents(salle,date)
+            var resp = await salleEvents(this.salles[salle],date)
             console.log(salle, resp);
         }
     }
 }
 
 module.exports = (async function() {
-    let resp = await fetch("https://cdn.jsdelivr.net/gh/AquaBx/salles_esir@master/data_salles.json")
+    let resp = await fetch("https://cdn.jsdelivr.net/gh/AquaBx/salles_esir/data_salles.json")
     let salles = await resp.json()
 
     let module_salles = class {
