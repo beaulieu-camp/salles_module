@@ -209,4 +209,6 @@ let module_salles = class {
     static exemple = main
 }
 
-module.exports = module_salles;
+if (typeof exports === 'object' && typeof module !== 'undefined') { 
+    module.exports = module_salles; 
+}
