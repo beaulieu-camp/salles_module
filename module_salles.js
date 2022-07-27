@@ -1,32 +1,4 @@
-var link = {
-    "amphi-l":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/KYNvDgYv.shu",
-    "amphi-m":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/V3LwD2WA.shu",
-    "amphi-n":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/XnmgOl3r.shu",
-    "salle-001":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/pn82LL38.shu",
-    "salle-002":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/qnqPZBYJ.shu",
-    "salle-003":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/o356qeYR.shu",
-    "salle-004":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/KW74qA3M.shu",
-    "salle-101":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/134B51nk.shu",
-    "salle-102":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/ynAw4b3w.shu",
-    "salle-103":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/E3ejzdY5.shu",
-    "salle-104":"https://planning.univ-rennes1.fr/jsp/custom/modules/plannings/OnE5qdnr.shu"
-}
-
-var salles = ["amphi-l","amphi-m","amphi-n","salle-001","salle-002","salle-003","salle-004","salle-101","salle-102","salle-103","salle-104"]
-
-var name = {
-    "amphi-l":"Amphi L",
-    "amphi-m":"Amphi M",
-    "amphi-n":"Amphi N",
-    "salle-001":"Salle 001",
-    "salle-002":"Salle 002",
-    "salle-003":"Salle 003",
-    "salle-004":"Salle 004",
-    "salle-101":"Salle 101",
-    "salle-102":"Salle 102",
-    "salle-103":"Salle 103",
-    "salle-104":"Salle 104"
-}
+let salles
 
 function to_date(char){
     var year = char.slice(0,4)
@@ -123,7 +95,7 @@ async function salleLibres(salle,date=Date.now()){
             - return.state : booléen : état de la salle ( libre : true , occupé : false )
             - return.until : int : date de fin de l'état (UNIX time)
     */
-    var url = link[salle]
+    var url = salles[salle]["link"]
     var cal = await get_cal(url);
     var req = dichotomie(cal,date,0,cal.length)
     var state = req[0]    
@@ -152,7 +124,7 @@ async function salleEvents(salle,date){
         return : 
             - liste des events d'une journée
     */
-    var url = link[salle]
+    var url = salles[salle][link]
     var cal = await get_cal(url);
     var req = dichotomie(cal,date,0,cal.length)  
     var i = req[1]
@@ -196,19 +168,18 @@ async function main(){
     }
 }
 
-//main()
+module.exports = (async function() {
+    let resp = await fetch("https://cdn.jsdelivr.net/gh/AquaBx/salles_esir@master/data_salles.json")
+    let salles = await resp.json()
 
-let module_salles = class {
-    static salleLibres = salleLibres
-    static salleEvents = salleEvents
-    static convert_unix_to_local = convert_unix_to_local
-    static salles = salles
-    static salles_link = link
-    static salles_names = name
+    let module_salles = class {
+        static salleLibres = salleLibres
+        static salleEvents = salleEvents
+        static convert_unix_to_local = convert_unix_to_local
+        static salles = salles
+        
+        static exemple = main
+    }
 
-    static exemple = main
-}
-
-if (typeof exports === 'object' && typeof module !== 'undefined') { 
-    module.exports = module_salles; 
-}
+    return module_salles;
+})();
