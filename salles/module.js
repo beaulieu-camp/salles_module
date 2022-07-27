@@ -123,7 +123,7 @@ async function salleEvents(salle,date){
         return : 
             - liste des events d'une journée
     */
-    var url = salle[link]
+    var url = salle["link"]
     var cal = await get_cal(url);
     var req = dichotomie(cal,date,0,cal.length)  
     var i = req[1]
