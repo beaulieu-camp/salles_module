@@ -9,60 +9,67 @@ function to_date(char){
     return date.getTime()
 }
 
+function checkafter(a,liste){
+    let b
+    do {
+        a += 1
+        b = a+1
+    } while ( liste[a][1] === liste[b][0] )
+    return a
+}
+
 function dichotomie(liste,datetime,a,b){
-    if (b-a == 1){
-        
-        if ( liste[b] === undefined ) return [undefined,"Les plannings ne sont pas à jour"]
-        if ( liste[a] === undefined ) return [undefined,"Les plannings sont en avance :)"]
-
-        var test1 = to_date(liste[a]["DTEND"]) < datetime
-        var test2 = datetime < to_date(liste[b]["DTSTART"])
-
-        if (test1 && test2){
-            return [true,b]
+    while (b-a > 1) {
+        let m = Math.floor( (b+a)/2 );
+        if (datetime < liste[m][0]) {
+            b = m;
         }
         else{
-            return [false,a]
+            a = m;
         }
-         
     }
-    var m = Math.floor((b+a)/2)
-    if (datetime < to_date(liste[m]["DTSTART"])) {
-        return dichotomie(liste,datetime,a,m)
+    
+    console.log(a,b,liste[a],liste[b])
+
+    if (datetime < liste[a][0]){ // apres le planning
+        return [undefined, "Les plannings sont en avance" ];
+    }
+    
+    if (datetime > liste[b][1]){ // avant le planning
+        return [undefined, "Les plannings ne sont pas à jour" ]
+    } 
+
+
+    let test1 = liste[b][1] < datetime;
+    let test2 = datetime < liste[b][0];
+
+    if (test1 && test2){
+        return [true,b];
     }
     else{
-        return dichotomie(liste,datetime,m,b)
+        let na = checkafter(a,liste)
+        return [false,na];
     }
 }
 
 function parse(data) {
-    var data = data.split(" \r\n ").join("");
-    data = data.split("\r\n ").join("");
-    data = data.split(" \r\n").join("");
     data = data.split("\r\n");
 
-    var obj =  [];
-    var push =  {};
-    for (var cle in data) {
-        var valeur = data[cle]
-        var split = valeur.split(':');
-        var nkey = split[0];
+    let obj =  [];
+    let nlist = []
+    for (let cle in data) {
+
+        let valeur = data[cle]
+        let split = valeur.split(':');
+        let nkey = split[0];
         
-        var nvalue = split.slice(1).join(" ");
-        if (nkey == "BEGIN" && nvalue != "VCALENDAR"){
-            push =  {};
+        if (nkey == "DTSTART" ){
+            nlist.push( to_date(split[1]) )
         }
-        else if (nkey == "END" && nvalue != "VCALENDAR"){
-            obj.push(push);
-        }
-        else if (nkey == "END" && nvalue == "VCALENDAR"){
-            break;
-        }
-        else if (nkey == "END" && nvalue == "VCALENDAR"){
-            break;
-        }
-        else{
-            push[nkey] = nvalue;
+        else if (nkey == "DTEND"){
+            nlist.push( to_date(split[1]) )
+            obj.push(nlist)
+            nlist = []
         }
     }
     return obj;
@@ -76,7 +83,8 @@ async function request(url){
 async function get_cal(url){
     var resp = await request(url);
     var cal = parse(resp)
-    cal.sort((a, b) => (a.DTEND > b.DTSTART) ? 1 : -1)
+    cal.sort((a, b) => (a[1] > b[0]) ? 1 : -1)
+    console.log(cal)
     return cal
 }
 
@@ -96,7 +104,7 @@ async function salleLibres(salle,date=Date.now()){
     */
     var url = salle["link"]
     var cal = await get_cal(url);
-    var req = dichotomie(cal,date,0,cal.length)
+    var req = dichotomie(cal,date,0,cal.length-1)
     var state = req[0]    
     var i = req[1]
     
@@ -105,12 +113,12 @@ async function salleLibres(salle,date=Date.now()){
     }
 
     if (state){
-        var jusque = cal[i]["DTSTART"]
+        var jusque = cal[i][0]
     }
     else{
-        var jusque = cal[i]["DTEND"]
+        var jusque = cal[i][1]
     }
-    return {"state":state,"until":to_date(jusque)}
+    return {"state":state,"until":jusque}
 }
 
 async function salleEvents(salle,date){
@@ -134,7 +142,7 @@ async function salleEvents(salle,date){
     }
 
     var liste = []
-    while (to_date(cal[i]["DTEND"]) < date + 24*60*60*1000){
+    while (cal[i][1] < date + 24*60*60*1000){
         liste.push(cal[i])
         i+=1
     }
