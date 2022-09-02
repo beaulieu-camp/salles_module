@@ -1,3 +1,5 @@
+const axios = require('axios');
+
 function to_date(char){
     var year = char.slice(0,4)
     var month = char.slice(4,6)
@@ -83,8 +85,8 @@ function parse(data) {
 }
 
 async function request(url){
-    const resp = await fetch(url);
-    return await resp.text();
+    const resp = await axios.get(url);
+    return await resp.data;
 };
 
 async function get_cal(url){
