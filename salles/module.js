@@ -10,41 +10,41 @@ function to_date(char){
 }
 
 function checkafter(a,liste){
-    let b
-    do {
+    let b = a+1
+
+    while ( liste[a]["end"] === liste[b]["start"] ) {
         a += 1
         b = a+1
-    } while ( liste[a][1] === liste[b][0] )
+    }
     return a
+
 }
 
 function dichotomie(liste,datetime,a,b){
     while (b-a > 1) {
         let m = Math.floor( (b+a)/2 );
-        if (datetime < liste[m][0]) {
+        if (datetime < liste[m]["start"]) {
             b = m;
         }
         else{
             a = m;
         }
     }
-    
-    console.log(a,b,liste[a],liste[b])
 
-    if (datetime < liste[a][0]){ // apres le planning
+    if (datetime < liste[a]["start"]){ // apres le planning
         return [undefined, "Les plannings sont en avance" ];
     }
     
-    if (datetime > liste[b][1]){ // avant le planning
+    if (datetime > liste[b]["end"]){ // avant le planning
         return [undefined, "Les plannings ne sont pas à jour" ]
     } 
 
 
-    let test1 = liste[b][1] < datetime;
-    let test2 = datetime < liste[b][0];
+    let test1 = liste[a]["end"] < datetime;
+    let test2 = datetime < liste[b]["start"];
 
     if (test1 && test2){
-        return [true,b];
+        	return [true,b];
     }
     else{
         let na = checkafter(a,liste)
@@ -56,7 +56,7 @@ function parse(data) {
     data = data.split("\r\n");
 
     let obj =  [];
-    let nlist = []
+    let nlist = {}
     for (let cle in data) {
 
         let valeur = data[cle]
@@ -64,12 +64,19 @@ function parse(data) {
         let nkey = split[0];
         
         if (nkey == "DTSTART" ){
-            nlist.push( to_date(split[1]) )
+            nlist["start"] = to_date(split[1])
         }
         else if (nkey == "DTEND"){
-            nlist.push( to_date(split[1]) )
+            nlist["end"] = to_date(split[1])
+        }
+        else if (nkey == "SUMMARY"){
+            nlist["summary"] = split[1]
+        }
+
+        if (Object.keys(nlist).length === 3){
             obj.push(nlist)
-            nlist = []
+            nlist = {}
+
         }
     }
     return obj;
@@ -83,8 +90,7 @@ async function request(url){
 async function get_cal(url){
     var resp = await request(url);
     var cal = parse(resp)
-    cal.sort((a, b) => (a[1] > b[0]) ? 1 : -1)
-    console.log(cal)
+    cal.sort((a, b) => (a["end"] > b["start"]) ? 1 : -1)
     return cal
 }
 
@@ -109,14 +115,14 @@ async function salleLibres(salle,date=Date.now()){
     var i = req[1]
     
     if ( state === undefined ) {
-        return {"erreur":i}
+        return {"error":i}
     }
 
     if (state){
-        var jusque = cal[i][0]
+        var jusque = cal[i]["start"]
     }
     else{
-        var jusque = cal[i][1]
+        var jusque = cal[i]["end"]
     }
     return {"state":state,"until":jusque}
 }
@@ -131,18 +137,23 @@ async function salleEvents(salle,date){
         return : 
             - liste des events d'une journée
     */
+
+    date = new Date(date).setHours(0)
+    date = new Date(date).setMinutes(0)
+    date = new Date(date).setSeconds(0)
+    
     var url = salle["link"]
     var cal = await get_cal(url);
-    var req = dichotomie(cal,date,0,cal.length)  
+    var req = dichotomie(cal,date,0,cal.length-1)  
     var state = req[0]
     var i = req[1]
 
     if ( state === undefined ) {
-        return {"erreur":i}
+        return {"error":i}
     }
 
     var liste = []
-    while (cal[i][1] < date + 24*60*60*1000){
+    while (cal[i]["end"] < date + 24*60*60*1000){
         liste.push(cal[i])
         i+=1
     }
@@ -159,8 +170,8 @@ async function exemple(salles){
 
     for (var salle in salles){
         var resp = await salleLibres(salles[salle])
-        if (resp.erreur){
-            console.log(resp.erreur)
+        if (resp.error){
+            console.log(resp.error)
         }
         else{
             console.log(salle, "Libre ?",resp.state, convert_unix_to_local(resp.until));
@@ -168,8 +179,8 @@ async function exemple(salles){
     }
     console.log("Salles Events")
     for (var salle in salles){
-        if (resp.erreur){
-            console.log(resp.erreur)
+        if (resp.error){
+            console.log(resp.error)
         }
         else{
             var date = new Date(Date.UTC(2022,0,10))
