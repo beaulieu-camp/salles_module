@@ -71,8 +71,8 @@ function parse(data) {
         else if (nkey == "DTEND"){
             nlist["end"] = to_date(split[1])
         }
-        else if (nkey == "SUMMARY"){
-            nlist["summary"] = split[1]
+        else if (nkey == "DESCRIPTION"){
+            nlist["description"] = split[1]
         }
 
         if (Object.keys(nlist).length === 3){
