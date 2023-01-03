@@ -1,3 +1,6 @@
+const cron = require("node-cron");
+const sqlite3 = require('sqlite3').verbose();
+
 function to_date(char){
     var year = char.slice(0,4)
     var month = char.slice(4,6)
@@ -9,53 +12,17 @@ function to_date(char){
     return date.getTime()
 }
 
-function checkafter(a,liste){
+function checkafter(liste,i=0){
     let b = a+1
-
-    while ( liste[a]["end"] === liste[b]["start"] ) {
+    while ( liste[b] !== undefined && liste[a]["end"] === liste[b]["start"] ) {
         a += 1
         b = a+1
     }
     return a
-
-}
-
-function dichotomie(liste,datetime,a,b){
-    while (b-a > 1) {
-        let m = Math.floor( (b+a)/2 );
-        if (datetime < liste[m]["start"]) {
-            b = m;
-        }
-        else{
-            a = m;
-        }
-    }
-
-    if (datetime < liste[a]["start"]){ // apres le planning
-        return [undefined, "Les plannings sont en avance" ];
-    }
-    
-    if (datetime > liste[b]["end"]){ // avant le planning
-        return [undefined, "Les plannings ne sont pas à jour" ]
-    } 
-
-
-    let test1 = liste[a]["end"] < datetime;
-    let test2 = datetime < liste[b]["start"];
-
-    if (test1 && test2){
-        	return [true,b];
-    }
-    else{
-        let na = checkafter(a,liste)
-        return [false,na];
-    }
 }
 
 function parse(data) {
-    console.log(data)
     data = data.replaceAll("\r\n ","").split("\r\n");
-    console.log(data)
     let obj =  [];
     let nlist = {}
     for (let cle in data) {
@@ -74,8 +41,14 @@ function parse(data) {
         else if (nkey == "DESCRIPTION"){
             nlist["description"] = val
         }
+        else if (nkey == "SUMMARY"){
+            nlist["summary"] = val
+        }
+	    else if (nkey == "UID"){
+            nlist["uid"] = val
+        }
 
-        if (Object.keys(nlist).length === 3){
+        if (Object.keys(nlist).length === 5){
             obj.push(nlist)
             nlist = {}
 
@@ -84,20 +57,33 @@ function parse(data) {
     return obj;
 }
 
-async function request(url){
-    const resp = await fetch(url);
-    return await resp.text();
-};
+async function actualize_salles(db,salles) {
+    for ( let i in salles){
+        let salle = salles[i]
+        let name = salle.name.replace("-","")
 
-async function get_cal(url){
-    var resp = await request(url);
-    var cal = parse(resp)
-    cal.sort((a, b) => (a["end"] > b["start"]) ? 1 : -1)
-    return cal
+        let url = salle.link
+        let req = await fetch(url)
+
+        if (req.status !== 200) { console.log("error: ",req.status); continue }
+        let text = await req.text()
+        let cal = await parse( text )
+
+        reset(db,name)
+
+        for (let event of cal) {
+            let start = event.start
+            let end = event.end
+            let uid = event.uid
+            let summary = event.summary.replace(/\'/g,"''")
+            let description = event.description.replace(/\'/g,"''")
+            let sql = `INSERT INTO ${name} (uid,salle, start, end, summary, description) VALUES ('${uid}','${name}',${start},${end},'${summary}','${description}')`
+            serialize(db,sql)
+        }
+    }
 }
 
-async function salleLibres(salle,date=Date.now()){
-
+function salleLibres(salles,callback,date=Date.now(),results={}) {
     /*
         Retourne si la salle est libre (true) ou non (false) sur 
 
@@ -110,26 +96,27 @@ async function salleLibres(salle,date=Date.now()){
             - return.state : booléen : état de la salle ( libre : true , occupé : false )
             - return.until : int : date de fin de l'état (UNIX time)
     */
-    var url = salle["link"]
-    var cal = await get_cal(url);
-    var req = dichotomie(cal,date,0,cal.length-1)
-    var state = req[0]    
-    var i = req[1]
-    
-    if ( state === undefined ) {
-        return {"error":i}
-    }
 
-    if (state){
-        var jusque = cal[i]["start"]
-    }
-    else{
-        var jusque = cal[i]["end"]
-    }
-    return {"state":state,"until":jusque}
+    if (salles.length === 0 ) { return callback(results) }
+
+    let db = this.database  
+    let salle = salles.pop()
+    let sql = `SELECT * FROM ${salle} WHERE start>=${date} ORDER BY start ASC`
+
+    read_db(db,sql, (data) => {
+        if ( date < data[0]["start"] ) { 
+            results[salle] = [ true, data[0]["start"] ]
+        }
+        else {
+            let i = checkafter(data) 
+            results[salle] = [ false, data[i]["end"] ]
+        }
+
+        salleLibres(salles,callback,date,results)
+    })
 }
 
-async function salleEvents(salle,date){
+function salleEvents(salles,callback,date=Date.now(),results={}) {
     /*
         Retourne les horaires des cours/events d'une journée donnée dans une salle donnée
         
@@ -139,27 +126,22 @@ async function salleEvents(salle,date){
         return : 
             - liste des events d'une journée
     */
+    if (salles.length === 0 ) { return callback(results) }
 
     date = new Date(date).setHours(0)
     date = new Date(date).setMinutes(0)
     date = new Date(date).setSeconds(0)
-    
-    var url = salle["link"]
-    var cal = await get_cal(url);
-    var req = dichotomie(cal,date,0,cal.length-1)  
-    var state = req[0]
-    var i = req[1]
+    let max_date = date + 24*60*60*1000
 
-    if ( state === undefined ) {
-        return {"error":i}
-    }
+    let db = this.database
+    let salle = salles.pop()
+    let sql = `SELECT * FROM ${salle} WHERE (start>=${date}) AND (end<=${max_date}) ORDER BY start ASC`
 
-    var liste = []
-    while (cal[i]["end"] < date + 24*60*60*1000){
-        liste.push(cal[i])
-        i+=1
-    }
-    return liste
+    read_db(db,sql, (data) => {
+        results[salle] = data
+
+        salleLibres(salles,callback,date,results)
+    })
 }
 
 function convert_unix_to_local(unix,local="fr-FR"){
@@ -167,39 +149,70 @@ function convert_unix_to_local(unix,local="fr-FR"){
     return date.toLocaleDateString(local, {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
 }
 
-async function exemple(salles){
-    console.log("Salles Libres")
-
-    for (var salle in salles){
-        var resp = await salleLibres(salles[salle])
-        if (resp.error){
-            console.log(resp.error)
+function close_db(db){
+    db.close((err) => {
+        if (err) {
+            console.error(err.message);
         }
-        else{
-            console.log(salle, "Libre ?",resp.state, convert_unix_to_local(resp.until));
-        }
-    }
-    console.log("Salles Events")
-    for (var salle in salles){
-        if (resp.error){
-            console.log(resp.error)
-        }
-        else{
-            var date = new Date(Date.UTC(2022,0,10))
-            date = date.getTime()
-            var resp = await salleEvents(salles[salle],date)
-            console.log(salle, resp);
-        }
-    }
+    });
 }
 
-let module_salles = class {
-    static salleLibres = salleLibres
-    static salleEvents = salleEvents
-    static convert_unix_to_local = convert_unix_to_local
-    static exemple = exemple
+function read_db(db,sql_command,callback) {
+    db.all(sql_command, (err, rows) => {
+        if (err) console.error(err.message, sql_command);
+        else callback(rows)
+    })
 }
+
+function serialize(db,sql){
+    db.serialize(() => {
+        db.each(sql, 
+         (err, row) => {
+             if (err) {
+                console.error(err.message, sql);
+             }
+           }
+        );
+     });
+}
+
+function reset(db,salle){
+    
+    let sql = `
+    DROP TABLE ${salle};
+    `
+    let sql2 =`
+    CREATE TABLE ${salle}
+    (
+        uid VARCHAR(60),
+        salle VARCHAR(30),
+        start INT,
+        end INT,
+        summary VARCHAR(100),
+        description VARCHAR(255)
+    )`
+    try{
+        serialize(db,sql)
+    }catch(e){}
+    serialize(db,sql2)
+}
+
 
 if (typeof exports === 'object' && typeof module !== 'undefined') { 
-    module.exports = module_salles; 
+    module.exports = class {
+        constructor(salles,database_file) {
+            this.salles = salles
+            this.database = new sqlite3.Database(database_file, sqlite3.OPEN_READWRITE, (err) => {if (err !== null) console.error(err)} )
+    
+            cron.schedule('0 0 * * * *', async function() {
+                console.log("update_db")
+                actualize_salles(this.database ,this.salles )
+                console.log("update_db_finished")
+            });
+
+            this.salleEvents = salleEvents
+            this.salleLibres = salleLibres
+            this.convert_unix_to_local = convert_unix_to_local
+        }
+    }
 }
