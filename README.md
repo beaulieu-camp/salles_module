@@ -7,7 +7,7 @@
 
 ```ts
 
-let salles = {"bat_salle_num":{"link":".../planning.shu"}}
+let salles = {"batiment_salle_numero":{"link":".../planning.shu"}}
 
 let module_salles = require("./module.js");
 
