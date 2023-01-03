@@ -58,9 +58,9 @@ function parse(data) {
 }
 
 async function actualize_salles(db,salles) {
-    for ( let i in salles){
-        let salle = salles[i]
-        let name = salle.name.replace("-","")
+    for ( let key in salles){
+        let salle = salles[key]
+        let name = key
 
         let url = salle.link
         let req = await fetch(url)
@@ -83,7 +83,7 @@ async function actualize_salles(db,salles) {
     }
 }
 
-function salleLibres(salles,callback,date=Date.now(),results={}) {
+function salleLibres(salles,callback,date=Date.now(),results={},db=this.database) {
     /*
         Retourne si la salle est libre (true) ou non (false) sur 
 
@@ -99,24 +99,23 @@ function salleLibres(salles,callback,date=Date.now(),results={}) {
 
     if (salles.length === 0 ) { return callback(results) }
 
-    let db = this.database  
     let salle = salles.pop()
     let sql = `SELECT * FROM ${salle} WHERE start>=${date} ORDER BY start ASC`
 
     read_db(db,sql, (data) => {
         if ( date < data[0]["start"] ) { 
-            results[salle] = [ true, data[0]["start"] ]
+            results[salle] = { state : true, until: data[0]["start"] }
         }
         else {
             let i = checkafter(data) 
-            results[salle] = [ false, data[i]["end"] ]
+            results[salle] = { state : false, until: data[i]["end"] }
         }
 
         salleLibres(salles,callback,date,results)
     })
 }
 
-function salleEvents(salles,callback,date=Date.now(),results={}) {
+function salleEvents(salles,callback,date=Date.now(),results={},db=this.database) {
     /*
         Retourne les horaires des cours/events d'une journée donnée dans une salle donnée
         
@@ -126,21 +125,20 @@ function salleEvents(salles,callback,date=Date.now(),results={}) {
         return : 
             - liste des events d'une journée
     */
-    if (salles.length === 0 ) { return callback(results) }
+    if ( salles.length === 0 ) { return callback(results) }
 
     date = new Date(date).setHours(0)
     date = new Date(date).setMinutes(0)
     date = new Date(date).setSeconds(0)
     let max_date = date + 24*60*60*1000
-
-    let db = this.database
+    
     let salle = salles.pop()
     let sql = `SELECT * FROM ${salle} WHERE (start>=${date}) AND (end<=${max_date}) ORDER BY start ASC`
 
     read_db(db,sql, (data) => {
         results[salle] = data
 
-        salleLibres(salles,callback,date,results)
+        salleEvents(salles,callback,date,results,db)
     })
 }
 
@@ -193,7 +191,7 @@ function reset(db,salle){
     )`
     try{
         serialize(db,sql)
-    }catch(e){}
+    } catch(e){}
     serialize(db,sql2)
 }
 
@@ -203,7 +201,11 @@ if (typeof exports === 'object' && typeof module !== 'undefined') {
         constructor(salles,database_file) {
             this.salles = salles
             this.database = new sqlite3.Database(database_file, sqlite3.OPEN_READWRITE, (err) => {if (err !== null) console.error(err)} )
-    
+            
+            console.log("update_db")
+            actualize_salles(this.database ,this.salles )
+            console.log("update_db_finished")
+
             cron.schedule('0 0 * * * *', async function() {
                 console.log("update_db")
                 actualize_salles(this.database ,this.salles )
