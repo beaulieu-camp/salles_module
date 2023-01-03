@@ -22,10 +22,10 @@ let myplannings = new module_salles(salles,"database.db")
 
 ```ts
 
-myplannings.salleEvents(salles:string[], callback:function, date:int)
+myplannings.salleEvents(salles:String[], callback:function, date:Integer)
 
-myplannings.salleLibres(salles:string[], callback:function, date:int)
+myplannings.salleLibres(salles:String[], callback:function, date:Integer)
 
-myplannings.convert_unix_to_local(unix:int,local:string)
+myplannings.convert_unix_to_local(unix:Integer,local:String)
 
 ```
