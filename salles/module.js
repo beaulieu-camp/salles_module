@@ -1,5 +1,3 @@
-const axios = require('axios');
-
 function to_date(char){
     var year = char.slice(0,4)
     var month = char.slice(4,6)
@@ -55,8 +53,9 @@ function dichotomie(liste,datetime,a,b){
 }
 
 function parse(data) {
-    data = data.split("\r\n");
-
+    console.log(data)
+    data = data.replaceAll("\r\n ","").split("\r\n");
+    console.log(data)
     let obj =  [];
     let nlist = {}
     for (let cle in data) {
@@ -64,15 +63,16 @@ function parse(data) {
         let valeur = data[cle]
         let split = valeur.split(':');
         let nkey = split[0];
-        
+        let val = split.slice(1).join(":");
+
         if (nkey == "DTSTART" ){
-            nlist["start"] = to_date(split[1])
+            nlist["start"] = to_date(val)
         }
         else if (nkey == "DTEND"){
-            nlist["end"] = to_date(split[1])
+            nlist["end"] = to_date(val)
         }
         else if (nkey == "DESCRIPTION"){
-            nlist["description"] = split[1]
+            nlist["description"] = val
         }
 
         if (Object.keys(nlist).length === 3){
@@ -85,8 +85,8 @@ function parse(data) {
 }
 
 async function request(url){
-    const resp = await axios.get(url);
-    return await resp.data;
+    const resp = await fetch(url);
+    return await resp.text();
 };
 
 async function get_cal(url){
