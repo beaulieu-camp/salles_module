@@ -1,5 +1,7 @@
 # Guide
 
+⚠️ Un fichier `.db` doit être initialiser pour l'instant
+
 ---
 
 ## Initialisation du module
