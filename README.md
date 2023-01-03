@@ -1,6 +1,6 @@
 # Guide
 
-⚠️ Un fichier `.db` doit être initialiser pour l'instant
+⚠️ Un fichier `.db` doit être initialisé pour l'instant
 
 ---
 
