@@ -2,9 +2,11 @@
   "name": "plannings",
   "version": "2.0.0",
   "description": "Verify if a room is available, list all events of room",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
-    "test": "node tests/test.js"
+    "build": "tsc",
+    "test": "node tests/index.js"
   },
   "repository": {
     "type": "git",
@@ -18,6 +20,7 @@
   "homepage": "https://github.com/AquaBx/salles_esir#readme",
   "dependencies": {
     "node-cron": "^3.0.2",
-    "sqlite3": "^5.1.4"
+    "sqlite3": "^5.1.4",
+    "typescript": "^4.9.4"
   }
 }
