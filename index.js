@@ -127,9 +127,9 @@ function salleEvents(salles,callback,date=Date.now(),results={},db=this.database
     */
     if ( salles.length === 0 ) { return callback(results) }
 
-    date = new Date(date).setHours(0)
-    date = new Date(date).setMinutes(0)
-    date = new Date(date).setSeconds(0)
+    //date = new Date(date).setHours(0)
+    //date = new Date(date).setMinutes(0)
+    //date = new Date(date).setSeconds(0)
     let max_date = date + 24*60*60*1000
     
     let salle = salles.pop()
