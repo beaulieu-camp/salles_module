@@ -1,33 +1,45 @@
 const cron = require("node-cron");
 const sqlite3 = require('sqlite3').verbose();
 
-function to_date(char){
-    var year = char.slice(0,4)
-    var month = char.slice(4,6)
-    var day = char.slice(6,8)
-    var hour = char.slice(9,11)
-    var minute = char.slice(11,13)
-    var sec = char.slice(13,15)
-    var date = new Date(Date.UTC(year,parseInt(month)-1,day,parseInt(hour),minute,sec))
+type Event = {
+    "start"?:number,
+    "end"?:number,
+    "description"?:string,
+    "summary"?:string,
+    "uid"?:string,
+}
+
+type Object_of_Events = {
+    [key:string]:Event
+}
+
+function to_date(char:string){
+    var year   = parseInt( char.slice( 0, 4) )
+    var month  = parseInt( char.slice( 4, 6) )
+    var day    = parseInt( char.slice( 6, 8) )
+    var hour   = parseInt( char.slice( 9,11) )
+    var minute = parseInt( char.slice(11,13) )
+    var sec    = parseInt( char.slice(13,15) )
+    var date    = new Date(Date.UTC(year,month-1,day,hour,minute,sec))
     return date.getTime()
 }
 
-function checkafter(liste,i=0){
-    let b = a+1
-    while ( liste[b] !== undefined && liste[a]["end"] === liste[b]["start"] ) {
-        a += 1
-        b = a+1
+function checkafter(liste:Event[],i=0){
+    let b = i+1
+    while ( liste[b] !== undefined && liste[i]["end"] === liste[b]["start"] ) {
+        i += 1
+        b = i+1
     }
-    return a
+    return i
 }
 
-function parse(data) {
-    data = data.replaceAll("\r\n ","").split("\r\n");
+function parse(data:string) {
+    let data_split = data.replaceAll("\r\n ","").split("\r\n");
     let obj =  [];
-    let nlist = {}
-    for (let cle in data) {
+    let nlist:Event = {}
+    for (let cle in data_split) {
 
-        let valeur = data[cle]
+        let valeur = data_split[cle]
         let split = valeur.split(':');
         let nkey = split[0];
         let val = split.slice(1).join(":");
@@ -109,27 +121,30 @@ async function actualize_salles(db,salles) {
     }
 }
 
-function salleLibres(salles,callback,date=Date.now(),results={},db=this.database) {
+function salleLibres(salles: string[], callback : Function, date = Date.now(),results={}, db=this.database) {
     /*
         Retourne si la salle est libre (true) ou non (false) sur 
 
         date est par défaut Date.now()
 
         Args : 
-            - salle : string
+            - salles : list of strings
             - date : int (UNIX time)
         Return :
             - return.state : booléen : état de la salle ( libre : true , occupé : false )
             - return.until : int : date de fin de l'état (UNIX time)
     */
 
-    if (salles.length === 0 ) { return callback(results) }
-
     let salle = salles.pop()
+    if (salle === undefined ) { return callback(results) }
+
     let sql = `SELECT * FROM ${salle} WHERE start>=${date} ORDER BY start ASC`
 
-    read_db(db,sql, (data) => {
-        if ( date < data[0]["start"] ) { 
+    read_db(db,sql, (data: Event[] ) => {
+        if (data === undefined){ 
+            results[salle] = {"state":"undefined"}
+        }
+        else if ( date < data[0]["start"] ) { 
             results[salle] = { state : true, until: data[0]["start"] }
         }
         else {
@@ -141,27 +156,27 @@ function salleLibres(salles,callback,date=Date.now(),results={},db=this.database
     })
 }
 
-function salleEvents(salles,callback,date=Date.now(),results={},db=this.database) {
+function salleEvents(salles:string[],callback:Function,date=Date.now(),results={},db=this.database) {
     /*
         Retourne les horaires des cours/events d'une journée donnée dans une salle donnée
         
         Args:
-            - salle : string
+            - salle : list of strings
             - date : int (UNIX time)
         return : 
             - liste des events d'une journée
     */
-    if ( salles.length === 0 ) { return callback(results) }
+    let salle = salles.pop()
+    if ( salle === undefined ) { return callback(results) }
 
     let min_date1 = (new Date(date)).setHours(0)
     let min_date2 = (new Date(min_date1)).setMinutes(0)
     let min_date3 = (new Date(min_date2)).setSeconds(0)
     let max_date = date + 24*60*60*1000
     
-    let salle = salles.pop()
     let sql = `SELECT * FROM ${salle} WHERE (start>=${min_date3}) AND (end<=${max_date}) ORDER BY start ASC`
 
-    read_db(db,sql, (data) => {
+    read_db(db,sql, (data:Object_of_Events) => {
         results[salle] = data
         salleEvents(salles,callback,date,results,db)
     })
@@ -173,15 +188,15 @@ function convert_unix_to_local(unix:number,local="fr-FR"){
 }
 
 function close_db(db){
-    db.close((err) => {
+    db.close((err:Error) => {
         if (err) {
             console.error(err.message);
         }
     });
 }
 
-function read_db(db,sql_command,callback) {
-    db.all(sql_command, (err, rows) => {
+function read_db(db,sql_command:string,callback:Function) {
+    db.all(sql_command, (err:Error, rows:[]) => {
         if (err) console.error(err.message, sql_command);
         else callback(rows)
     })
@@ -189,9 +204,17 @@ function read_db(db,sql_command,callback) {
 
 
 export default class {
-    constructor(salles,database_file) {
+
+    salles
+    database
+    load
+    salleEvents
+    salleLibres
+    convert_unix_to_local
+
+    constructor(salles,database_file:string) {
         this.salles = salles
-        this.database = new sqlite3.Database(database_file, sqlite3.OPEN_READWRITE, (err) => {if (err !== null) console.error(err)} )
+        this.database = new sqlite3.Database(database_file, sqlite3.OPEN_READWRITE, (err:Error) => {if (err !== null) console.error(err)} )
         
         
         cron.schedule('0 0 * * * *', async function() {
