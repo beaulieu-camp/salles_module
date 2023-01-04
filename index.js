@@ -80,6 +80,7 @@ async function actualize_salles(db,salles) {
             let sql = `INSERT INTO ${name} (uid,salle, start, end, summary, description) VALUES ('${uid}','${name}',${start},${end},'${summary}','${description}')`
             serialize(db,sql)
         }
+	   console.log( `update_${name}_finished` )
     }
 }
 
@@ -127,13 +128,13 @@ function salleEvents(salles,callback,date=Date.now(),results={},db=this.database
     */
     if ( salles.length === 0 ) { return callback(results) }
 
-    //date = new Date(date).setHours(0)
-    //date = new Date(date).setMinutes(0)
-    //date = new Date(date).setSeconds(0)
+    let min_date1 = (new Date(date)).setHours(0)
+    let min_date2 = (new Date(min_date1)).setMinutes(0)
+    let min_date3 = (new Date(min_date2)).setSeconds(0)
     let max_date = date + 24*60*60*1000
     
     let salle = salles.pop()
-    let sql = `SELECT * FROM ${salle} WHERE (start>=${date}) AND (end<=${max_date}) ORDER BY start ASC`
+    let sql = `SELECT * FROM ${salle} WHERE (start>=${min_date3}) AND (end<=${max_date}) ORDER BY start ASC`
 
     read_db(db,sql, (data) => {
         results[salle] = data
@@ -209,7 +210,6 @@ if (typeof exports === 'object' && typeof module !== 'undefined') {
             cron.schedule('0 0 * * * *', async function() {
                 console.log("update_db")
                 actualize_salles(this.database ,this.salles )
-                console.log("update_db_finished")
             });
 
             this.salleEvents = salleEvents
