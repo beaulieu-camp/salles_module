@@ -44,7 +44,7 @@ function parse(data) {
         else if (nkey == "SUMMARY"){
             nlist["summary"] = val
         }
-	    else if (nkey == "UID"){
+        else if (nkey == "UID"){
             nlist["uid"] = val
         }
 
@@ -55,6 +55,18 @@ function parse(data) {
         }
     }
     return obj;
+}
+
+function sql_reset(salle:string){
+    return `CREATE TABLE IF NOT EXISTS ${salle}
+    (
+        uid VARCHAR(60),
+        salle VARCHAR(30),
+        start INT,
+        end INT,
+        summary VARCHAR(100),
+        description VARCHAR(255)
+    )`
 }
 
 async function actualize_salles(db,salles) {
@@ -72,19 +84,28 @@ async function actualize_salles(db,salles) {
         let text = await req.text()
         let cal = await parse( text )
 
-        reset(db,name)
         let sql_values = []
-         for (let event of cal) {
-            let start = event.start
-            let end = event.end
-            let uid = event.uid
-            let summary = event.summary.replace(/\'/g,"''")
-            let description = event.description.replace(/\'/g,"''")
-            sql_values.push(`('${uid}','${name}',${start},${end},'${summary}','${description}')`)
+        for (let event of cal) {
+            sql_values = sql_values.concat( Object.values(event) )
         }
-	    console.log( `update_${name}_finished` )
-        let sql = `INSERT INTO ${name} (uid,salle, start, end, summary, description) VALUES ${sql_values.join(",")}`
-        serialize(db,sql)
+
+        let sql1 = sql_reset(name)
+
+        let sql2 = `DELETE FROM ${name}`
+
+        let placeholders = cal.map((e) => '(?,?,?,?,?)').join(',');
+        let sql3 = `INSERT INTO ${name} (start, end, summary, description, uid) VALUES ${placeholders}`
+
+        db.serialize(() => {
+            db.run( sql1 );
+            db.run( sql2 );
+            db.run( sql3, sql_values , function(err) {
+                if (err) {
+                  return console.log(err.message);
+                }
+                console.log( `update_${name}_finished` )
+            });
+        });
     }
 }
 
@@ -142,12 +163,11 @@ function salleEvents(salles,callback,date=Date.now(),results={},db=this.database
 
     read_db(db,sql, (data) => {
         results[salle] = data
-
         salleEvents(salles,callback,date,results,db)
     })
 }
 
-function convert_unix_to_local(unix,local="fr-FR"){
+function convert_unix_to_local(unix:number,local="fr-FR"){
     var date = new Date(unix)
     return date.toLocaleDateString(local, {weekday: "long", day: "numeric", hour: "numeric", minute: "numeric"})
 }
@@ -167,58 +187,20 @@ function read_db(db,sql_command,callback) {
     })
 }
 
-function serialize(db,sql){
-    db.serialize(() => {
-        db.each(sql, 
-         (err, row) => {
-             if (err) {
-                console.error(err.message, sql);
-             }
-           }
-        );
-     });
-}
 
-function reset(db,salle){
-    
-    let sql = `
-    DROP TABLE ${salle};
-    `
-    let sql2 =`
-    CREATE TABLE ${salle}
-    (
-        uid VARCHAR(60),
-        salle VARCHAR(30),
-        start INT,
-        end INT,
-        summary VARCHAR(100),
-        description VARCHAR(255)
-    )`
-    try{
-        serialize(db,sql)
-    } catch(e){}
-    serialize(db,sql2)
-}
-
-
-if (typeof exports === 'object' && typeof module !== 'undefined') { 
-    module.exports = class {
-        constructor(salles,database_file) {
-            this.salles = salles
-            this.database = new sqlite3.Database(database_file, sqlite3.OPEN_READWRITE, (err) => {if (err !== null) console.error(err)} )
-            
-            console.log("update_db")
+export default class {
+    constructor(salles,database_file) {
+        this.salles = salles
+        this.database = new sqlite3.Database(database_file, sqlite3.OPEN_READWRITE, (err) => {if (err !== null) console.error(err)} )
+        
+        
+        cron.schedule('0 0 * * * *', async function() {
             actualize_salles(this.database ,this.salles )
-            console.log("update_db_finished")
-
-            cron.schedule('0 0 * * * *', async function() {
-                console.log("update_db")
-                actualize_salles(this.database ,this.salles )
-            });
-
-            this.salleEvents = salleEvents
-            this.salleLibres = salleLibres
-            this.convert_unix_to_local = convert_unix_to_local
-        }
+        });
+        
+        this.load = actualize_salles( this.database, this.salles )
+        this.salleEvents = salleEvents
+        this.salleLibres = salleLibres
+        this.convert_unix_to_local = convert_unix_to_local
     }
 }
