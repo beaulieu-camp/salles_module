@@ -111,7 +111,7 @@ function salleLibres(salles,callback,date=Date.now(),results={},db=this.database
             results[salle] = { state : false, until: data[i]["end"] }
         }
 
-        salleLibres(salles,callback,date,results)
+        salleLibres(salles,callback,date,results,db)
     })
 }
 
