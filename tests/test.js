@@ -1,5 +1,5 @@
 const https = require('http');
-const esir_salles = require('./index.js')
+const esir_salles = require('../index.js')
 const fs = require('fs');
 
 let salles = {
@@ -38,7 +38,7 @@ let salles = {
     }
 }
 
-let esir = new esir_salles(salles,"database.db")
+let esir = new esir_salles(salles,"./tests/database.db")
 
 const options = {
   	// key: fs.readFileSync('/root/.getssl/aquabx.ovh/aquabx.ovh.key'),

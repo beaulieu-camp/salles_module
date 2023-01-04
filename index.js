@@ -58,6 +58,9 @@ function parse(data) {
 }
 
 async function actualize_salles(db,salles) {
+    /*
+    fonction qui permet d'actualiser toutes les tables représentant les salles
+    */
     for ( let key in salles){
         let salle = salles[key]
         let name = key
@@ -70,17 +73,18 @@ async function actualize_salles(db,salles) {
         let cal = await parse( text )
 
         reset(db,name)
-
-        for (let event of cal) {
+        let sql_values = []
+         for (let event of cal) {
             let start = event.start
             let end = event.end
             let uid = event.uid
             let summary = event.summary.replace(/\'/g,"''")
             let description = event.description.replace(/\'/g,"''")
-            let sql = `INSERT INTO ${name} (uid,salle, start, end, summary, description) VALUES ('${uid}','${name}',${start},${end},'${summary}','${description}')`
-            serialize(db,sql)
+            sql_values.push(`('${uid}','${name}',${start},${end},'${summary}','${description}')`)
         }
-	   console.log( `update_${name}_finished` )
+	    console.log( `update_${name}_finished` )
+        let sql = `INSERT INTO ${name} (uid,salle, start, end, summary, description) VALUES ${sql_values.join(",")}`
+        serialize(db,sql)
     }
 }
 
