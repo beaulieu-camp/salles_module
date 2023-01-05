@@ -28,17 +28,18 @@ let server = app.listen(5000);
     }
   }
 
-  let esir = new esir_salles.default(salles, `${__dirname}/database.sqlite`)
+  let esir = new esir_salles.default(salles, `${__dirname}/database.sqlite`);
+  Promise.all( esir.loaded ).then((val)=>{
+    console.log(val)
+    
+    esir.salleLibres(Object.keys(salles) , (results) => { 
+      console.log( results ) 
+    }, Date.now())
 
-  await esir.load
+    esir.salleEvents(Object.keys(salles) , (results) => { 
+      console.log( results["test1"][0] ) 
+    }, Date.now())
 
-  esir.salleLibres(Object.keys(salles) , (results) => { 
-    console.log( results ) 
-  }, Date.now())
-
-  esir.salleEvents(Object.keys(salles) , (results) => { 
-    console.log( results["test1"][0] ) 
-  }, Date.now())
-
-  // await fetch("http://localhost:5000/close")
+    // fetch("http://localhost:5000/close")
+  })
 })()
