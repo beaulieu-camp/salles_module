@@ -81,22 +81,22 @@ function sql_reset(salle:string){
     )`
 }
 
-async function actualize_salles(db,salles) {
+function actualize_salles(db,salles:Object_of_Events) {
     /*
     fonction qui permet d'actualiser toutes les tables représentant les salles
     */
-    for ( let key in salles){
+    return Object.keys(salles).map((key:String) => new Promise(async (resolve, reject)=>{
         let salle = salles[key]
-        let name = key
+        let name = salle.name ? salle.name : key
 
         let url = salle.link
         let req = await fetch(url)
 
-        if (req.status !== 200) { console.log("error: ",req.status); continue }
+        if (req.status !== 200) { return reject(`http error : ${req.status} ${req.statusText}`) }
         let text = await req.text()
         let cal = await parse( text )
 
-        let sql_values = []
+        let sql_values:any = []
         for (let event of cal) {
             sql_values = sql_values.concat( Object.values(event) )
         }
@@ -109,16 +109,18 @@ async function actualize_salles(db,salles) {
         let sql3 = `INSERT INTO ${name} (start, end, summary, description, uid) VALUES ${placeholders}`
 
         db.serialize(() => {
-            db.run( sql1 );
-            db.run( sql2 );
-            db.run( sql3, sql_values , function(err) {
-                if (err) {
-                  return console.log(err.message);
-                }
-                console.log( `update_${name}_finished` )
-            });
-        });
-    }
+            db.run( sql1, function(err:Error) {
+                if (err) reject(`database error : ${err.message}`)
+            })
+            db.run( sql2, function(err:Error) {
+                    if (err) reject(`database error : ${err.message}`)
+            })
+            db.run( sql3, sql_values , function(err:Error) {
+                if (err) Promise.reject(`database error : ${err.message}`)
+                else resolve("updated")
+            })
+        })
+    }))   
 }
 
 function salleLibres(salles: string[], callback : Function, date = Date.now(),results={}, db=this.database) {
@@ -172,7 +174,7 @@ function salleEvents(salles:string[],callback:Function,date=Date.now(),results={
     let min_date1 = (new Date(date)).setHours(0)
     let min_date2 = (new Date(min_date1)).setMinutes(0)
     let min_date3 = (new Date(min_date2)).setSeconds(0)
-    let max_date = date + 24*60*60*1000
+    let max_date = min_date3 + 24*60*60*1000
     
     let sql = `SELECT * FROM ${salle} WHERE (start>=${min_date3}) AND (end<=${max_date}) ORDER BY start ASC`
 
@@ -207,7 +209,7 @@ export default class {
 
     salles
     database
-    load
+    loaded
     salleEvents
     salleLibres
     convert_unix_to_local
@@ -216,12 +218,13 @@ export default class {
         this.salles = salles
         this.database = new sqlite3.Database(database_file, sqlite3.OPEN_READWRITE, (err:Error) => {if (err !== null) console.error(err)} )
         
-        
-        cron.schedule('0 0 * * * *', async function() {
-            actualize_salles(this.database ,this.salles )
+        let parent = this
+        cron.schedule('0 0 * * * *', async (time:Date) => {
+            console.log(time, "database update")
+            parent.loaded = actualize_salles(parent.database ,parent.salles )
         });
         
-        this.load = actualize_salles( this.database, this.salles )
+        this.loaded = actualize_salles( this.database, this.salles )
         this.salleEvents = salleEvents
         this.salleLibres = salleLibres
         this.convert_unix_to_local = convert_unix_to_local
