@@ -32,8 +32,6 @@ myplannings.loaded // stocke les promesses de chaque mise à jour de salle
 myplannings.database // stocke l'instance de la base de donnée
 
 myplannings.salles // stocke les salles
-    
-    
 
 ```
 
