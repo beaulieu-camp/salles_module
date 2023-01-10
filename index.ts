@@ -136,11 +136,10 @@ function salleLibres(salles: string[], callback : Function, date = Date.now(),re
             - return.state : booléen : état de la salle ( libre : true , occupé : false )
             - return.until : int : date de fin de l'état (UNIX time)
     */
-
     let salle = salles.pop()
     if (salle === undefined ) { return callback(results) }
 
-    let sql = `SELECT * FROM ${salle} WHERE end>=${date} ORDER BY start ASC`
+    let sql = `SELECT * FROM ${salle} WHERE (end>${date}) ORDER BY end ASC`
 
     read_db(db,sql, (data: Event[] ) => {
         if (data === undefined){ 
