@@ -140,6 +140,7 @@ function salleLibres(salles: string[], callback : Function, date = Date.now(),re
     if (salle === undefined ) { return callback(results) }
 
     let sql = `SELECT * FROM ${salle} WHERE (end>${date}) ORDER BY end ASC`
+
     read_db(db,sql, (data: Event[] ) => {
         if (data === undefined){ 
             results[salle] = {"state":"undefined"}
