@@ -1,4 +1,4 @@
-let base_url = "https://beaulieu-camp.github.io/api"
+let base_url = "https://beaulieu-camp.github.io/salles"
 
 type Event = [number,number,string]
 
