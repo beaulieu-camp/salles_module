@@ -1,8 +1,5 @@
 # Guide
 
-⚠️ Un fichier `.db` ou `.sqlite` doit être initialisé pour l'instant
-
----
 
 ```
 npm install https://github.com/aquabx/salles_esir#module
@@ -12,27 +9,21 @@ npm install https://github.com/aquabx/salles_esir#module
 
 
 ```ts
-const plannings = require("plannings");
+import { salleEvents,salleLibres,getSalles } from "../includes/salles.ts";
 
-let salles = {"batiment_salle_numero":{"link":".../planning.shu"}}
+(async function(){
 
-let myplannings = new plannings.default(salles,"database.db")
+    // Renvoie le status de toutes les salles dans la console
+    for (let salle of await getSalles()) {
 
-```
+        let code = salle[2]
+        let date = parseInt(Date.now()/1000) // le temps est en secondes ⚠️
 
----
+        console.log( await salleLibres(code,date) )
 
-## Les variables disponibles
+    }
 
-
-```ts
-
-myplannings.loaded // stocke les promesses de chaque mise à jour de salle
-
-myplannings.database // stocke l'instance de la base de donnée
-
-myplannings.salles // stocke les salles
-
+})()
 ```
 
 ## Les fonctions possibles
@@ -40,10 +31,12 @@ myplannings.salles // stocke les salles
 
 ```ts
 
-myplannings.salleEvents(salles:String[], callback:function, date:Integer)
+salleEvents(salles:string, date:number)
 
-myplannings.salleLibres(salles:String[], callback:function, date:Integer)
+salleLibres(salles:string, date:number)
 
-myplannings.convert_unix_to_local(unix:Integer,local:String)
+getSalles()
+
+convert_unix_to_local(unix:Integer,local:String)
 
 ```

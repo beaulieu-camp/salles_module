@@ -1,6 +1,6 @@
 {
   "name": "plannings",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Verify if a room is available, list all events of room",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -8,19 +8,9 @@
     "build": "tsc",
     "test": "node tests/index.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/AquaBx/salles_esir.git"
-  },
   "author": "Tom Chauvel @AquaBx",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/AquaBx/salles_esir/issues"
-  },
-  "homepage": "https://github.com/AquaBx/salles_esir#readme",
   "dependencies": {
-    "node-cron": "^3.0.2",
-    "sqlite3": "^5.1.4",
     "typescript": "^4.9.4"
   }
 }
