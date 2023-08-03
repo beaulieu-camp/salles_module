@@ -9,7 +9,7 @@ npm install https://github.com/aquabx/salles_esir#module
 
 
 ```ts
-import { salleEvents,salleLibres,getSalles } from "../includes/salles.ts";
+import { salleEvents,salleLibres,getSalles } from "salles_module";
 
 (async function(){
 
