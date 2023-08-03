@@ -1,5 +1,5 @@
 {
-  "name": "plannings",
+  "name": "salles_module",
   "version": "3.0.0",
   "description": "Verify if a room is available, list all events of room",
   "main": "lib/index.js",
