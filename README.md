@@ -2,7 +2,7 @@
 
 
 ```
-npm install https://github.com/aquabx/salles_esir#module
+npm install https://github.com/beaulieu-camp/salles_module
 ```
 
 ## Initialisation du module
