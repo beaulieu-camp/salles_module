@@ -20,12 +20,18 @@ function dichotomie(liste:Event[],datetime:number,a:number,b:number) : [boolean,
         y : number -> date a laquelle la salle ce statut change
       
     */
-    if (b-a == 1){
+   
+
+   if (b-a == 1){
         var test1 = liste[a][0] < datetime
         var test2 = datetime < liste[b][1]
-
+        var test3 = liste[b][1] < datetime // cas out of bound1
+        
         if (test1 && test2){
             return [true,b]
+        }
+        else if (test3) {
+            return [true,-1]
         }
         else{
             return [false,a]
@@ -58,10 +64,13 @@ export async function salleLibres(salle:string,date:number){
     let cal = await ( await fetch(base_url + "/" + salle + ".json") ).json()
 
 
-    var req = dichotomie(cal, date,0,cal.length )
+    var req = dichotomie(cal, date,0,cal.length-1 )
     var state = req[0]    
     var i = req[1]
     
+    if (i == -1) {
+        return {"state":"Calendrier pas à jour","until":0}
+    }
     if (state){
         i = checkafter(cal,i) // vérification des évenements collés 
         return {"state":"Occupé","until":cal[i][1]}
