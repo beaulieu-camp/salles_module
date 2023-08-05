@@ -69,7 +69,7 @@ export async function salleLibres(salle:string,date:number){
     var i = req[1]
     
     if (i == -1) {
-        return {"state":"Calendrier pas à jour","until":0}
+        return {"error":"Calendrier pas à jour"}
     }
     if (state){
         i = checkafter(cal,i) // vérification des évenements collés 
