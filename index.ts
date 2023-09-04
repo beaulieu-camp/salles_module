@@ -21,13 +21,17 @@ function dichotomie(liste:Event[],datetime:number,a:number,b:number) : [boolean,
       
     */
    
-
-   if (b-a == 1){
+    if (b-a <= 1){
+        var test0 = datetime < liste[a][0] 
         var test1 = liste[a][1] < datetime
         var test2 = datetime < liste[b][0]
         var test3 = liste[b][1] < datetime // cas out of bound1
         
-        if (test1 && test2){
+
+        if (test0){
+            return [false,a]
+        }
+        else if (test1 && test2){
             return [false,b]
         }
         else if (test3) {
