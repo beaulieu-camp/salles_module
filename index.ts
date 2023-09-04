@@ -23,18 +23,18 @@ function dichotomie(liste:Event[],datetime:number,a:number,b:number) : [boolean,
    
 
    if (b-a == 1){
-        var test1 = liste[a][0] < datetime
-        var test2 = datetime < liste[b][1]
+        var test1 = liste[a][1] < datetime
+        var test2 = datetime < liste[b][0]
         var test3 = liste[b][1] < datetime // cas out of bound1
         
         if (test1 && test2){
-            return [true,b]
+            return [false,b]
         }
         else if (test3) {
             return [true,-1]
         }
         else{
-            return [false,a]
+            return [true,a]
         }
          
     }
@@ -67,10 +67,10 @@ export async function salleLibres(salle:string,date:number){
     var req = dichotomie(cal, date,0,cal.length-1 )
     var state = req[0]    
     var i = req[1]
-    
     if (i == -1) {
         return {"error":"Calendrier pas à jour"}
     }
+    console.log(state)
     if (state){
         i = checkafter(cal,i) // vérification des évenements collés 
         return {"state":"Occupé","until":cal[i][1]}
